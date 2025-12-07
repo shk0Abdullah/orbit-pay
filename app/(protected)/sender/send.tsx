@@ -1,8 +1,8 @@
 // app/sender/send.tsx
+import { bluetoothClient } from "@/lib/bluetooth/client";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
-import { bluetoothClient } from "../../lib/bluetooth/client";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function SendScreen() {
   const router = useRouter();
@@ -35,9 +35,25 @@ export default function SendScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Send to: {deviceId}</Text>
 
-      <TextInput placeholder="Your name" style={styles.input} value={name} onChangeText={setName} />
-      <TextInput placeholder="Amount" keyboardType="numeric" style={styles.input} value={payment} onChangeText={setPayment} />
-      <TextInput placeholder="Receiver name" style={styles.input} value={receiver} onChangeText={setReceiver} />
+      <TextInput
+        placeholder="Your name"
+        style={styles.input}
+        value={name}
+        onChangeText={setName}
+      />
+      <TextInput
+        placeholder="Amount"
+        keyboardType="numeric"
+        style={styles.input}
+        value={payment}
+        onChangeText={setPayment}
+      />
+      <TextInput
+        placeholder="Receiver name"
+        style={styles.input}
+        value={receiver}
+        onChangeText={setReceiver}
+      />
 
       <Button title="Send Request" onPress={send} />
       <View style={{ height: 16 }} />

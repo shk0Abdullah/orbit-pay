@@ -1,8 +1,8 @@
 // app/receiver/incoming.tsx
-import { useEffect, useState } from "react";
-import { View, Text, Button, StyleSheet, Alert } from "react-native";
+import { bluetoothServer } from "@/lib/bluetooth/server";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { bluetoothServer } from "../../lib/bluetooth/server";
+import { useEffect, useState } from "react";
+import { Alert, Button, StyleSheet, Text, View } from "react-native";
 
 export default function Incoming() {
   const { deviceId } = useLocalSearchParams<{ deviceId: string }>();
@@ -24,14 +24,20 @@ export default function Incoming() {
             {
               text: "Reject",
               onPress: async () => {
-                await bluetoothServer.sendResponse(device, JSON.stringify({ status: "rejected" }));
+                await bluetoothServer.sendResponse(
+                  device,
+                  JSON.stringify({ status: "rejected" })
+                );
               },
               style: "cancel",
             },
             {
               text: "Accept",
               onPress: async () => {
-                await bluetoothServer.sendResponse(device, JSON.stringify({ status: "accepted" }));
+                await bluetoothServer.sendResponse(
+                  device,
+                  JSON.stringify({ status: "accepted" })
+                );
               },
             },
           ]);

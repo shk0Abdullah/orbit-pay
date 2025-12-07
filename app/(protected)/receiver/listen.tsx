@@ -1,9 +1,15 @@
 // app/receiver/listen.tsx
-import { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import type { Device } from "react-native-ble-plx";
-import { bluetoothClient } from "../../lib/bluetooth/client"; // reuse scanning
+import { bluetoothClient } from "@/lib/bluetooth/client"; // reuse scanning
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import type { Device } from "react-native-ble-plx";
 
 export default function ReceiverList() {
   const [devices, setDevices] = useState<Device[]>([]);
@@ -15,7 +21,9 @@ export default function ReceiverList() {
     // In a more advanced approach, receiver advertises; here we show a simple UI
     // where receiver picks a device to connect to and listen for a request.
     bluetoothClient.startScan((device) => {
-      setDevices((prev) => (prev.find((d) => d.id === device.id) ? prev : [...prev, device]));
+      setDevices((prev) =>
+        prev.find((d) => d.id === device.id) ? prev : [...prev, device]
+      );
     });
 
     return () => bluetoothClient.stopScan();
@@ -28,7 +36,15 @@ export default function ReceiverList() {
         data={devices}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.item} onPress={() => router.push({ pathname: "/receiver/incoming", params: { deviceId: item.id } })}>
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() =>
+              router.push({
+                pathname: "/receiver/incoming",
+                params: { deviceId: item.id },
+              })
+            }
+          >
             <Text style={{ fontWeight: "600" }}>{item.name || "Unnamed"}</Text>
             <Text style={{ color: "#666" }}>{item.id}</Text>
           </TouchableOpacity>

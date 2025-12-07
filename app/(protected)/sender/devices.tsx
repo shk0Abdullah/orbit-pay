@@ -45,14 +45,23 @@
 // });
 
 // app/sender/devices.tsx
-import { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, PermissionsAndroid, Platform } from "react-native";
-import type { Device } from "react-native-ble-plx";
-import { bluetoothClient } from "../../lib/bluetooth/client";
+import { bluetoothClient } from "@/lib/bluetooth/client";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  PermissionsAndroid,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import type { Device } from "react-native-ble-plx";
 
 async function requestBlePermissions() {
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     const granted = await PermissionsAndroid.requestMultiple([
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
@@ -68,7 +77,6 @@ async function requestBlePermissions() {
   return true; // iOS handles permissions differently
 }
 
-
 export default function Devices() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [scanning, setScanning] = useState(true);
@@ -77,8 +85,6 @@ export default function Devices() {
   // useEffect(() => {
   //   setDevices([]);
   //   setScanning(true);
-
-
 
   //   // Start scanning
   //   bluetoothClient.startScan((device) => {
@@ -96,7 +102,6 @@ export default function Devices() {
   //     bluetoothClient.stopScan();
   //   };
   // }, []);
-
 
   useEffect(() => {
     async function startScanning() {
@@ -151,9 +156,16 @@ export default function Devices() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.item}
-              onPress={() => router.push({ pathname: "/sender/send", params: { deviceId: item.id } })}
+              onPress={() =>
+                router.push({
+                  pathname: "/sender/send",
+                  params: { deviceId: item.id },
+                })
+              }
             >
-              <Text style={{ fontWeight: "600" }}>{item.name || "Unnamed"}</Text>
+              <Text style={{ fontWeight: "600" }}>
+                {item.name || "Unnamed"}
+              </Text>
               <Text style={{ color: "#666" }}>{item.id}</Text>
             </TouchableOpacity>
           )}
