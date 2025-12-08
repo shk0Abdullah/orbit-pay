@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "payment-mvp",
-    "slug": "payment-mvp",
+    "name": "Coder-Tailwind",
+    "slug": "Fuck & Code",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,11 +19,13 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.essambhatti.paymentmvp"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "bundler" : "metro"
     },
     "plugins": [
       "expo-router",
@@ -43,6 +45,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a3fa4d65-0b93-4d01-b032-881d8b074b74"
+      }
+    },
+    "owner": "abd5046"
   }
 }
