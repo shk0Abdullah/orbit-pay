@@ -63,48 +63,73 @@ export default function SignUpScreen() {
     }
   };
 
+  /* ---  ONLY the JSX part replaced;  state / handlers untouched  --- */
   if (pendingVerification) {
     return (
-      <>
-        <Text>Verify your email</Text>
-        <TextInput
-          value={code}
-          placeholder="Enter your verification code"
-          onChangeText={(code) => setCode(code)}
-        />
-        <TouchableOpacity onPress={onVerifyPress}>
-          <Text>Verify</Text>
-        </TouchableOpacity>
-      </>
+      <View className="flex-1 bg-[#4710cb] justify-center items-center px-6">
+        <View className="bg-white/10 rounded-2xl px-6 py-8 w-full max-w-sm">
+          <Text className="text-white text-2xl font-bold text-center mb-6">
+            Verify your email
+          </Text>
+
+          <TextInput
+            value={code}
+            placeholder="Enter your verification code"
+            placeholderTextColor="#ffffff80"
+            onChangeText={setCode}
+            className="bg-white/20 text-white rounded-lg px-4 py-3 mb-4"
+          />
+
+          <TouchableOpacity
+            onPress={onVerifyPress}
+            className="bg-[#c0f667] rounded-lg py-3 items-center"
+          >
+            <Text className="text-[#4710cb] font-bold">Verify</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     );
   }
 
   return (
-    <View>
-      <>
-        <Text>Sign up</Text>
+    <View className="flex-1 bg-[#4710cb] justify-center items-center px-6">
+      <View className="bg-white/10 rounded-2xl px-6 py-8 w-full max-w-sm">
+        <Text className="text-white text-2xl font-bold text-center mb-6">
+          Sign up
+        </Text>
+
         <TextInput
           autoCapitalize="none"
           value={emailAddress}
           placeholder="Enter email"
-          onChangeText={(email) => setEmailAddress(email)}
+          placeholderTextColor="#ffffff80"
+          onChangeText={setEmailAddress}
+          className="bg-white/20 text-white rounded-lg px-4 py-3 mb-4"
         />
+
         <TextInput
           value={password}
           placeholder="Enter password"
-          secureTextEntry={true}
-          onChangeText={(password) => setPassword(password)}
+          placeholderTextColor="#ffffff80"
+          secureTextEntry
+          onChangeText={setPassword}
+          className="bg-white/20 text-white rounded-lg px-4 py-3 mb-6"
         />
-        <TouchableOpacity onPress={onSignUpPress}>
-          <Text>Continue</Text>
+
+        <TouchableOpacity
+          onPress={onSignUpPress}
+          className="bg-[#c0f667] rounded-lg py-3 items-center mb-4"
+        >
+          <Text className="text-[#4710cb] font-bold">Continue</Text>
         </TouchableOpacity>
-        <View style={{ display: "flex", flexDirection: "row", gap: 3 }}>
-          <Text>Already have an account?</Text>
+
+        <View className="flex-row justify-center items-center gap-2">
+          <Text className="text-white/80">Already have an account?</Text>
           <Link href="/(auth)/signin">
-            <Text>Sign in</Text>
+            <Text className="text-[#c0f667] font-semibold">Sign in</Text>
           </Link>
         </View>
-      </>
+      </View>
     </View>
   );
 }
