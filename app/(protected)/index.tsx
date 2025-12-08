@@ -16,7 +16,7 @@ export default function Home() {
         </SignedIn>
         <SignedOut>
           <Link href="/(auth)/sign-in">
-            <Text>Sign in</Text>
+            <Text style={{ color: "white" }}>Sign in</Text>
           </Link>
           <Link href="/(auth)/sign-up">
             <Text>Sign up</Text>

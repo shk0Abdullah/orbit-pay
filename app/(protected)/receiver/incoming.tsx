@@ -18,6 +18,7 @@ export default function Incoming() {
         setConnectedDevice(device);
 
         unsub = bluetoothServer.listenForMessages(device, (msg) => {
+          console.log(msg);
           setIncoming(msg);
           // show accept/reject
           Alert.alert("Incoming request", msg, [

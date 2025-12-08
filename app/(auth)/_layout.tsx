@@ -1,5 +1,6 @@
 import { useAuth } from "@clerk/clerk-expo";
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Slot } from "expo-router";
+import "../../global.css";
 
 export default function AuthRoutesLayout() {
   const { isSignedIn } = useAuth();
@@ -7,6 +8,5 @@ export default function AuthRoutesLayout() {
   if (isSignedIn) {
     return <Redirect href={"/(protected)"} />;
   }
-
-  return <Stack />;
+  return <Slot />;
 }

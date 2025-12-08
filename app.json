@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "payment-mvp",
-    "slug": "payment-mvp",
+    "name": "Coder-Tailwind",
+    "slug": "Fuck & Code",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -24,7 +24,8 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "bundler" : "metro"
     },
     "plugins": [
       "expo-router",

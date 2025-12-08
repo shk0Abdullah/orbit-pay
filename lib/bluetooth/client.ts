@@ -1,7 +1,7 @@
 // lib/bluetooth/client.ts
 import { BleManager, Device } from "react-native-ble-plx";
-import { encodeToBase64, decodeFromBase64 } from "../utils/encoding";
-import { SERVICE_UUID, MESSAGE_UUID, RESPONSE_UUID } from "./constants";
+import { decodeFromBase64, encodeToBase64 } from "../utils/encoding";
+import { MESSAGE_UUID, RESPONSE_UUID, SERVICE_UUID } from "./constants";
 
 export class BluetoothClient {
   private manager = new BleManager();
@@ -32,7 +32,7 @@ export class BluetoothClient {
 
   // Connect to deviceId and return connected Device
   async connect(deviceId: string): Promise<Device> {
-    const device = await this.manager.connectToDevice(deviceId, { timeout: 10000 });
+    const device = await this.manager.connectToDevice(deviceId, { timeout: 3000 });
     await device.discoverAllServicesAndCharacteristics();
     return device;
   }

@@ -25,7 +25,7 @@ export default function Page() {
       // and redirect the user
       if (signInAttempt.status === "complete") {
         await setActive({ session: signInAttempt.createdSessionId });
-        router.replace("/");
+        router.replace("/(protected)");
       } else {
         // If the status isn't complete, check why. User might need to
         // complete further steps.
@@ -39,27 +39,50 @@ export default function Page() {
   };
 
   return (
-    <View>
-      <Text>Sign in</Text>
-      <TextInput
-        autoCapitalize="none"
-        value={emailAddress}
-        placeholder="Enter email"
-        onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
-      />
-      <TextInput
-        value={password}
-        placeholder="Enter password"
-        secureTextEntry={true}
-        onChangeText={(password) => setPassword(password)}
-      />
-      <TouchableOpacity onPress={onSignInPress}>
-        <Text>Continue</Text>
-      </TouchableOpacity>
-      <View style={{ display: "flex", flexDirection: "row", gap: 3 }}>
-        <Link href="/sign-up">
-          <Text>Sign up</Text>
-        </Link>
+    <View className="flex-1 bg-[#c0f667] justify-center items-center px-6">
+      {/* App Title */}
+      <Text className="text-3xl font-bold text-black mb-10">OrbitPay</Text>
+
+      <View className="w-full">
+        {/* Sign In Heading */}
+        <Text className="text-2xl font-semibold text-black mb-4">Sign In</Text>
+
+        {/* Email */}
+        <TextInput
+          autoCapitalize="none"
+          value={emailAddress}
+          placeholder="Enter email"
+          placeholderTextColor="#444"
+          className="w-full bg-white/80 p-4 rounded-xl mb-4 text-black"
+          onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
+        />
+
+        {/* Password */}
+        <TextInput
+          value={password}
+          placeholder="Enter password"
+          secureTextEntry={true}
+          placeholderTextColor="#444"
+          className="w-full bg-white/80 p-4 rounded-xl mb-6 text-black"
+          onChangeText={(password) => setPassword(password)}
+        />
+
+        {/* Continue Button */}
+        <TouchableOpacity
+          onPress={onSignInPress}
+          className="bg-black py-4 rounded-xl w-full"
+        >
+          <Text className="text-center text-white font-semibold text-lg">
+            Continue
+          </Text>
+        </TouchableOpacity>
+
+        {/* Signup Link */}
+        <View className="flex flex-row justify-center mt-4">
+          <Link href="/(auth)/signup">
+            <Text className="text-black underline">Sign up</Text>
+          </Link>
+        </View>
       </View>
     </View>
   );

@@ -50,7 +50,7 @@ export default function SignUpScreen() {
       // and redirect the user
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
-        router.replace("/");
+        router.replace("/(protected)");
       } else {
         // If the status is not complete, check why. User may need to
         // complete further steps.
@@ -100,7 +100,7 @@ export default function SignUpScreen() {
         </TouchableOpacity>
         <View style={{ display: "flex", flexDirection: "row", gap: 3 }}>
           <Text>Already have an account?</Text>
-          <Link href="/sign-in">
+          <Link href="/(auth)/signin">
             <Text>Sign in</Text>
           </Link>
         </View>

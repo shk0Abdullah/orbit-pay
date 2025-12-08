@@ -15,9 +15,12 @@ export default function SendScreen() {
   const send = async () => {
     setStatus("Connecting...");
     try {
+      console.log("........");
       const device = await bluetoothClient.connect(deviceId as string);
+      console.log(device);
       setStatus("Connected — sending request...");
       const payload = { name, payment, receiver };
+      console.log(payload);
       await bluetoothClient.sendMessage(device, payload);
 
       setStatus("Waiting for response...");
