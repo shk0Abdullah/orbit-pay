@@ -14,6 +14,7 @@ export default function ServerScreen() {
 
   const startListening = async () => {
     const device = await server.listenForConnections();
+    console.log(device.address)
     setListening(true);
 
     server.onData(device, (data) => {
