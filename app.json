@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Coder-Tailwind",
-    "slug": "Fuck & Code",
+    "name": "paymentmvp",
+    "slug": "payment-mvp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -18,6 +18,9 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
+      "permissions": [
+        "CAMERA"
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.essambhatti.paymentmvp"
@@ -25,7 +28,7 @@
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png",
-      "bundler" : "metro"
+      "bundler": "metro"
     },
     "plugins": [
       "expo-router",
@@ -40,6 +43,16 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "with-rn-bluetooth-classic",
+        {
+          "peripheralUsageDescription": "Allow Bluetooth to connect with nearby devices",
+          "alwaysUsageDescription": "Bluetooth access required for payments",
+          "protocols": [
+            "com.orbitpay.p1"
+          ]
+        }
       ]
     ],
     "experiments": {
@@ -49,9 +62,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "a3fa4d65-0b93-4d01-b032-881d8b074b74"
+        "projectId": "d4c2e2b0-dd1d-4f34-be68-1118dae8a3a4"
       }
     },
-    "owner": "abd5046"
+    "owner": "essambhatti"
   }
 }

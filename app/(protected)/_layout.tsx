@@ -8,7 +8,7 @@ import "../../global.css";
 
 export default function RootLayout() {
   const { isSignedIn } = useAuth();
-  if (isSignedIn) {
+  if (!isSignedIn) {
     return <Stack />;
   }
   return <Redirect href={"/(auth)/signin"} />;
