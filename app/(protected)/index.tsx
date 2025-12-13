@@ -10,10 +10,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import RNBluetoothClassic from "react-native-bluetooth-classic";
 
 export default function Home() {
   const { user } = useUser();
   const [darkMode, setDarkMode] = useState(true);
+  const enableBluetooth = async () => {
+    const enabled = await RNBluetoothClassic.isBluetoothEnabled();
+    if (!enabled) {
+      await RNBluetoothClassic.requestBluetoothEnabled();
+    }
+  };
 
   return (
     <SafeAreaView
@@ -38,7 +45,10 @@ export default function Home() {
             />
 
             {/* Bluetooth icon button placeholder */}
-            <TouchableOpacity className="bg-[#4710cb] p-2 rounded-full">
+            <TouchableOpacity
+              onPress={enableBluetooth}
+              className="bg-[#4710cb] p-2 rounded-full"
+            >
               <View className="w-4 h-4 rounded-sm bg-[#f5f5f5]" />
             </TouchableOpacity>
           </View>
