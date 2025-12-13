@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, FlatList, Text, TouchableOpacity, View } from "react-native";
 import RNBluetoothClassic, {
   BluetoothDevice,
 } from "react-native-bluetooth-classic";
-
-// const SPP_UUID = "00001101-0000-1000-8000-00805F9B34FB";
 
 export default function BluetoothClient() {
   const [devices, setDevices] = useState<BluetoothDevice[]>([]);
@@ -66,12 +64,15 @@ export default function BluetoothClient() {
       alert("Send Failed");
     }
   };
+  useEffect(() => {
+    enableBluetooth();
+  }, []);
 
   return (
     <View style={{ padding: 20 }}>
       <Text style={{ fontSize: 18, fontWeight: "bold" }}>CLIENT DEVICE</Text>
 
-      <Button title="Enable Bluetooth" onPress={enableBluetooth} />
+      {/* <Button title="Enable Bluetooth" onPress={enableBluetooth} /> */}
       <Button title="Scan Paired Devices" onPress={scanDevices} />
 
       <FlatList

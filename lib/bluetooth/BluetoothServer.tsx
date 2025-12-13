@@ -17,14 +17,9 @@ export default function BluetoothServer() {
 
   /** STEP 1: Enable Bluetooth */
   const enableBluetooth = async () => {
-    try {
-      const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-      if (!enabled) {
-        await RNBluetoothClassic.requestBluetoothEnabled();
-      }
-      Alert.alert("Bluetooth Enabled");
-    } catch (e) {
-      console.error(e);
+    const enabled = await RNBluetoothClassic.isBluetoothEnabled();
+    if (!enabled) {
+      await RNBluetoothClassic.requestBluetoothEnabled();
     }
   };
 
@@ -74,12 +69,15 @@ export default function BluetoothServer() {
       readSubscription?.remove();
     };
   }, [readSubscription]);
+  useEffect(() => {
+    enableBluetooth();
+  }, []);
 
   return (
     <View style={{ padding: 20 }}>
       <Text style={{ fontSize: 18, fontWeight: "bold" }}>SERVER DEVICE</Text>
 
-      <Button title="Enable Bluetooth" onPress={enableBluetooth} />
+      {/* <Button title="Enable Bluetooth" onPress={enableBluetooth} /> */}
       <Button title="Start Server (Accept)" onPress={startServer} />
 
       {receivedPayment && (
