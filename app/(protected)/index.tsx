@@ -23,7 +23,7 @@ export default function Home() {
             </Text>
           </View>
         </View>
-        ;{/* Actions */}
+        {/* Actions */}
         <View className="gap-4">
           <Link href="/(protected)/bluetooth/client">
             <View className="rounded-2xl p-5 bg-[#f5f5f5] shadow">
@@ -47,7 +47,6 @@ export default function Home() {
             </View>
           </Link>
         </View>
-        ;
       </View>
     </>
   );
