@@ -1,2 +1,4 @@
 Blue:  #4710cb
 Green:   #c0f667
+Smokey Black: #100C08
+Smokey White: #f5f5f5
