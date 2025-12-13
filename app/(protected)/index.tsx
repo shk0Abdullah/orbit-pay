@@ -2,20 +2,27 @@
 import { SignOutButton } from "@/app/components/SignOutButton";
 import { useUser } from "@clerk/clerk-expo";
 import { Link } from "expo-router";
-// import { Bluetooth } from "lucide-react-native";
 import { useState } from "react";
-import { Switch, Text, TouchableOpacity, View } from "react-native";
+import {
+  SafeAreaView,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Home() {
   const { user } = useUser();
   const [darkMode, setDarkMode] = useState(true);
 
   return (
-    <View className={`flex-1 ${darkMode ? "bg-[#100C08]" : "bg-[#f5f5f5]"}`}>
-      {/* Safe padding wrapper */}
-      <View className="px-4 pt-4">
+    <SafeAreaView
+      className={`flex-1 ${darkMode ? "bg-[#100C08]" : "bg-[#f5f5f5]"}`}
+    >
+      {/* Content wrapper keeps UI below status bar */}
+      <View className="flex-1 px-4">
         {/* Header */}
-        <View className="flex-row justify-between items-center mb-6">
+        <View className="flex-row justify-between items-center mb-3 pt-7 mt-6">
           <Text
             className={`${darkMode ? "text-[#f5f5f5]" : "text-[#100C08]"} text-xl font-semibold`}
           >
@@ -30,15 +37,15 @@ export default function Home() {
               thumbColor={darkMode ? "#c0f667" : "#4710cb"}
             />
 
-            {/* Bluetooth icon button */}
+            {/* Bluetooth icon button placeholder */}
             <TouchableOpacity className="bg-[#4710cb] p-2 rounded-full">
-              {/* <Bluetooth color="#f5f5f5" size={18} /> */}
+              <View className="w-4 h-4 rounded-sm bg-[#f5f5f5]" />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Balance Card (glass / real wallet style) */}
-        <View className="rounded-3xl p-6 mb-6 bg-gradient-to-br from-[#4710cb] to-[#2e0aa3] shadow-lg">
+        {/* Balance Card */}
+        <View className="rounded-3xl p-6 mb-6 bg-[#4710cb] shadow-lg">
           <Text className="text-[#f5f5f5] text-xs uppercase tracking-widest">
             Wallet Balance
           </Text>
@@ -53,9 +60,8 @@ export default function Home() {
           </View>
         </View>
 
-        {/* Action Widgets */}
+        {/* Actions */}
         <View className="gap-4">
-          {/* Send */}
           <Link href="/(protected)/bluetooth/client">
             <View className="rounded-2xl p-5 bg-[#f5f5f5] shadow">
               <Text className="text-[#100C08] text-lg font-semibold">
@@ -67,7 +73,6 @@ export default function Home() {
             </View>
           </Link>
 
-          {/* Receive */}
           <Link href="/(protected)/bluetooth/server">
             <View className="rounded-2xl p-5 bg-[#f5f5f5] shadow">
               <Text className="text-[#100C08] text-lg font-semibold">
@@ -85,6 +90,6 @@ export default function Home() {
           <SignOutButton />
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
