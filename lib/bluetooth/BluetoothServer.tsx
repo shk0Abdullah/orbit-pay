@@ -75,9 +75,6 @@ export default function BluetoothServer() {
 
   return (
     <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 18, fontWeight: "bold" }}>SERVER DEVICE</Text>
-
-      {/* <Button title="Enable Bluetooth" onPress={enableBluetooth} /> */}
       <Button title="Start Server (Accept)" onPress={startServer} />
 
       {receivedPayment && (
