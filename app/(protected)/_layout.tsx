@@ -27,11 +27,11 @@ export default function RootLayout() {
         await RNBluetoothClassic.requestBluetoothEnabled();
       }
       Alert.alert("Bluetooth Enabled");
-    } catch (e) {
+    } catch  {
       Alert.alert("Enable the bluetooth");
     }
   };
-  if (!isSignedIn) {
+  if (isSignedIn) {
     return (
       <SafeAreaView
         className={`flex-1 ${darkMode ? "bg-[#100C08]" : "bg-[#f5f5f5]"}`}
