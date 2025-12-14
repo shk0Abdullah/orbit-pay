@@ -23,64 +23,22 @@ export default function RootLayout() {
         console.log("gonna wait for the await");
         await RNBluetoothClassic.requestBluetoothEnabled();
       }
-
-      const updatedStatus = await RNBluetoothClassic.isBluetoothEnabled();
-      console.log(updatedStatus);
-      setBleEnabled(updatedStatus);
-
-      Alert.alert(updatedStatus ? "Bluetooth Enabled" : "Bluetooth Disabled");
-    } catch {
-      Alert.alert("Failed to enable Bluetooth");
+      Alert.alert("Bluetooth Enabled");
+    } catch  {
+      Alert.alert("Enable the bluetooth");
     }
   };
-
-  useEffect(() => {
-    const checkBluetooth = async () => {
-      const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-      setBleEnabled(enabled);
-    };
-
-    checkBluetooth();
-  }, []);
-
-  return (
-    <SafeAreaView
-      className={`flex-1 ${darkMode ? "bg-[#100C08]" : "bg-[#f5f5f5]"}`}
-    >
-      <View className="flex-1 px-4 mt-4 pt-6 m-2 p-3">
-        {/* Enhanced Header */}
-        <View className="flex-row justify-between items-center pt-4 pb-3 border-b border-[#f5f5f5]/10">
-          {/* Logo & Brand */}
-          <View className="flex-row items-center">
-            <View className="w-9 h-9 rounded-full bg-[#4710cb] items-center justify-center mr-2.5 shadow-lg">
-              <Radio size={18} color="#c0f667" />
-            </View>
-            <View>
-              <Text
-                className={`text-xl font-bold ${
-                  darkMode ? "text-[#f5f5f5]" : "text-[#100C08]"
-                }`}
-              >
-                OrbitPay
-              </Text>
-              <Text
-                className={`text-xs ${
-                  darkMode ? "text-[#f5f5f5]/40" : "text-[#100C08]/40"
-                }`}
-              >
-                Secure Payments
-              </Text>
-            </View>
-          </View>
-
-          {/* Action Buttons */}
-          <View className="flex-row items-center gap-2">
-            {/* Dark mode toggle */}
-            <TouchableOpacity
-              onPress={() => setDarkMode((prev) => !prev)}
-              className={`p-2.5 rounded-full ${
-                darkMode ? "bg-[#f5f5f5]/10" : "bg-[#100C08]/10"
-              }`}
+  if (isSignedIn) {
+    return (
+      <SafeAreaView
+        className={`flex-1 ${darkMode ? "bg-[#100C08]" : "bg-[#f5f5f5]"}`}
+      >
+        {/* Content wrapper keeps UI below status bar */}
+        <View className="flex-1 px-4">
+          {/* Layout */}
+          <View className="flex-row justify-between items-center mb-3 pt-7 mt-6">
+            <Text
+              className={`${darkMode ? "text-[#f5f5f5]" : "text-[#100C08]"} text-xl font-semibold`}
             >
               {darkMode ? (
                 <Sun size={20} color="#c0f667" />

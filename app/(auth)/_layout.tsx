@@ -5,7 +5,7 @@ import "../../global.css";
 export default function AuthRoutesLayout() {
   const { isSignedIn } = useAuth();
 
-  if (!isSignedIn) {
+  if (isSignedIn) {
     return <Redirect href={"/(protected)"} />;
   }
   return <Slot />;

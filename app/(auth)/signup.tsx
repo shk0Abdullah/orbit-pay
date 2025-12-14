@@ -1,132 +1,165 @@
 import { useSignUp } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
 import * as React from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useAtom } from "jotai";
+import { signupAtom } from "../store/signup";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+
+const phoneRegex = /^\d{4}-\d{7}$/;
+const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
-
-  const [emailAddress, setEmailAddress] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const [signup, setSignup] = useAtom(signupAtom);
   const [pendingVerification, setPendingVerification] = React.useState(false);
   const [code, setCode] = React.useState("");
 
-  // Handle submission of sign-up form
+  const createUser = useMutation(api.users.createOrGetUser);
+
   const onSignUpPress = async () => {
     if (!isLoaded) return;
 
-    // Start sign-up process using email and password provided
-    try {
-      await signUp.create({
-        emailAddress,
-        password,
-      });
-
-      // Send user an email with verification code
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
-      setPendingVerification(true);
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2));
+    if (!phoneRegex.test(signup.phone)) {
+      Alert.alert("Invalid phone", "Use format 0300-1234567");
+      return;
     }
+
+    if (!cnicRegex.test(signup.cnic)) {
+      Alert.alert("Invalid CNIC", "Use format 12345-6789123-4");
+      return;
+    }
+
+    await signUp.create({
+      emailAddress: signup.email,
+      password: signup.password,
+    });
+
+    await signUp.prepareEmailAddressVerification({
+      strategy: "email_code",
+    });
+
+    setPendingVerification(true);
   };
 
-  // Handle submission of verification form
   const onVerifyPress = async () => {
     if (!isLoaded) return;
 
-    try {
-      // Use the code the user provided to attempt verification
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code,
+    const attempt = await signUp.attemptEmailAddressVerification({ code });
+
+    if (attempt.status === "complete") {
+      await setActive({ session: attempt.createdSessionId });
+
+      await createUser({
+        clerkId: attempt.createdUserId!,
+        email: signup.email,
+        phone: signup.phone,
+        cnic: signup.cnic,
       });
 
-      // If verification was completed, set the session to active
-      // and redirect the user
-      if (signUpAttempt.status === "complete") {
-        await setActive({ session: signUpAttempt.createdSessionId });
-        router.replace("/(protected)");
-      } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
-        console.error(JSON.stringify(signUpAttempt, null, 2));
-      }
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2));
+      router.replace("/(protected)");
     }
   };
 
-  /* ---  ONLY the JSX part replaced;  state / handlers untouched  --- */
+  /* ---------------- Verification Screen ---------------- */
   if (pendingVerification) {
     return (
-      <View className="flex-1 bg-[#4710cb] justify-center items-center px-6">
-        <View className="bg-white/10 rounded-2xl px-6 py-8 w-full max-w-sm">
-          <Text className="text-white text-2xl font-bold text-center mb-6">
-            Verify your email
+      <View className="flex-1 bg-[#c0f667] justify-center items-center px-6">
+        <Text className="text-3xl font-bold text-black mb-10">OrbitPay</Text>
+
+        <View className="w-full">
+          <Text className="text-2xl font-semibold text-black mb-4">
+            Verify Email
           </Text>
 
           <TextInput
             value={code}
-            placeholder="Enter your verification code"
-            placeholderTextColor="#ffffff80"
+            placeholder="Verification code"
+            placeholderTextColor="#444"
             onChangeText={setCode}
-            className="bg-white/20 text-white rounded-lg px-4 py-3 mb-4"
+            className="w-full bg-white/80 p-4 rounded-xl mb-6 text-black"
           />
 
           <TouchableOpacity
             onPress={onVerifyPress}
-            className="bg-[#c0f667] rounded-lg py-3 items-center"
+            className="bg-black py-4 rounded-xl w-full"
           >
-            <Text className="text-[#4710cb] font-bold">Verify</Text>
+            <Text className="text-center text-white font-semibold text-lg">
+              Verify
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 
+  /* ---------------- Sign Up Screen ---------------- */
   return (
-    <View className="flex-1 bg-[#4710cb] justify-center items-center px-6">
-      <View className="bg-white/10 rounded-2xl px-6 py-8 w-full max-w-sm">
-        <Text className="text-white text-2xl font-bold text-center mb-6">
-          Sign up
+    <View className="flex-1 bg-[#c0f667] justify-center items-center px-6">
+      <Text className="text-3xl font-bold text-black mb-10">OrbitPay</Text>
+
+      <View className="w-full">
+        <Text className="text-2xl font-semibold text-black mb-4">
+          Sign Up
         </Text>
 
         <TextInput
           autoCapitalize="none"
-          value={emailAddress}
+          value={signup.email}
           placeholder="Enter email"
-          placeholderTextColor="#ffffff80"
-          onChangeText={setEmailAddress}
-          className="bg-white/20 text-white rounded-lg px-4 py-3 mb-4"
+          placeholderTextColor="#444"
+          onChangeText={(v) =>
+            setSignup((s) => ({ ...s, email: v }))
+          }
+          className="w-full bg-white/80 p-4 rounded-xl mb-4 text-black"
         />
 
         <TextInput
-          value={password}
-          placeholder="Enter password"
-          placeholderTextColor="#ffffff80"
           secureTextEntry
-          onChangeText={setPassword}
-          className="bg-white/20 text-white rounded-lg px-4 py-3 mb-6"
+          value={signup.password}
+          placeholder="Enter password"
+          placeholderTextColor="#444"
+          onChangeText={(v) =>
+            setSignup((s) => ({ ...s, password: v }))
+          }
+          className="w-full bg-white/80 p-4 rounded-xl mb-4 text-black"
+        />
+
+        <TextInput
+          value={signup.phone}
+          placeholder="Phone (0300-1234567)"
+          placeholderTextColor="#444"
+          onChangeText={(v) =>
+            setSignup((s) => ({ ...s, phone: v }))
+          }
+          className="w-full bg-white/80 p-4 rounded-xl mb-4 text-black"
+        />
+
+        <TextInput
+          value={signup.cnic}
+          placeholder="CNIC (12345-6789123-4)"
+          placeholderTextColor="#444"
+          onChangeText={(v) =>
+            setSignup((s) => ({ ...s, cnic: v }))
+          }
+          className="w-full bg-white/80 p-4 rounded-xl mb-6 text-black"
         />
 
         <TouchableOpacity
           onPress={onSignUpPress}
-          className="bg-[#c0f667] rounded-lg py-3 items-center mb-4"
+          className="bg-black py-4 rounded-xl w-full"
         >
-          <Text className="text-[#4710cb] font-bold">Continue</Text>
+          <Text className="text-center text-white font-semibold text-lg">
+            Continue
+          </Text>
         </TouchableOpacity>
 
-        <View className="flex-row justify-center items-center gap-2">
-          <Text className="text-white/80">Already have an account?</Text>
+        <View className="flex-row justify-center mt-4">
+          <Text className="text-black">Already have an account? </Text>
           <Link href="/(auth)/signin">
-            <Text className="text-[#c0f667] font-semibold">Sign in</Text>
+            <Text className="text-black underline">Sign in</Text>
           </Link>
         </View>
       </View>
