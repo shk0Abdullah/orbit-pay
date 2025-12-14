@@ -1,5 +1,5 @@
 import { Slot } from "expo-router";
-import { Bluetooth, BluetoothOff, Moon, Radio, Sun } from "lucide-react-native";
+import { Bluetooth, BluetoothOff, Moon, Sun } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -9,64 +9,80 @@ import {
   View,
 } from "react-native";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
+import { useAuth } from "@clerk/clerk-expo";
 import "../../global.css";
 
 export default function RootLayout() {
+  const { isSignedIn } = useAuth();
+
   const [darkMode, setDarkMode] = useState(true);
-  const [bleEnabled, setBleEnabled] = useState<null | boolean>(null);
+  const [bleEnabled, setBleEnabled] = useState<boolean | null>(null);
+
+  // Sync bluetooth status
+  useEffect(() => {
+    (async () => {
+      try {
+        const enabled = await RNBluetoothClassic.isBluetoothEnabled();
+        setBleEnabled(enabled);
+      } catch {
+        setBleEnabled(false);
+      }
+    })();
+  }, []);
 
   const enableBluetooth = async () => {
     try {
       const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-      console.log("Enabled:", enabled);
       if (!enabled) {
-        console.log("gonna wait for the await");
         await RNBluetoothClassic.requestBluetoothEnabled();
+        setBleEnabled(true);
+      } else {
+        setBleEnabled(true);
       }
-      Alert.alert("Bluetooth Enabled");
-    } catch  {
-      Alert.alert("Enable the bluetooth");
+    } catch {
+      Alert.alert("Bluetooth Error", "Unable to enable Bluetooth");
     }
   };
-  if (isSignedIn) {
-    return (
-      <SafeAreaView
-        className={`flex-1 ${darkMode ? "bg-[#100C08]" : "bg-[#f5f5f5]"}`}
-      >
-        {/* Content wrapper keeps UI below status bar */}
-        <View className="flex-1 px-4">
-          {/* Layout */}
-          <View className="flex-row justify-between items-center mb-3 pt-7 mt-6">
-            <Text
-              className={`${darkMode ? "text-[#f5f5f5]" : "text-[#100C08]"} text-xl font-semibold`}
-            >
-              {darkMode ? (
-                <Sun size={20} color="#c0f667" />
-              ) : (
-                <Moon size={20} color="#4710cb" />
-              )}
-            </TouchableOpacity>
 
-            {/* Bluetooth toggle */}
-            <TouchableOpacity
-              onPress={enableBluetooth}
-              className={`p-2.5 rounded-full shadow-lg ${
-                bleEnabled ? "bg-[#4710cb]" : "bg-[#f5f5f5]/20"
-              }`}
-            >
-              {bleEnabled ? (
-                <Bluetooth size={20} color="#c0f667" />
-              ) : (
-                <BluetoothOff size={20} color="#f5f5f5" />
-              )}
-            </TouchableOpacity>
-          </View>
+  if (!isSignedIn) {
+    return <Slot />;
+  }
+
+  return (
+    <SafeAreaView
+      className={`flex-1 ${darkMode ? "bg-[#100C08]" : "bg-[#f5f5f5]"}`}
+    >
+      <View className="flex-1 px-4">
+        {/* Header */}
+        <View className="flex-row justify-between items-center mb-3 pt-7 mt-6">
+          {/* Theme toggle */}
+          <TouchableOpacity onPress={() => setDarkMode(!darkMode)}>
+            {darkMode ? (
+              <Sun size={22} color="#c0f667" />
+            ) : (
+              <Moon size={22} color="#4710cb" />
+            )}
+          </TouchableOpacity>
+
+          {/* Bluetooth toggle */}
+          <TouchableOpacity
+            onPress={enableBluetooth}
+            className={`p-2.5 rounded-full ${
+              bleEnabled ? "bg-[#4710cb]" : "bg-[#ffffff30]"
+            }`}
+          >
+            {bleEnabled ? (
+              <Bluetooth size={20} color="#c0f667" />
+            ) : (
+              <BluetoothOff size={20} color="#f5f5f5" />
+            )}
+          </TouchableOpacity>
         </View>
 
-        {/* Bluetooth Status Indicator */}
+        {/* Bluetooth status */}
         {bleEnabled !== null && (
-          <View className="py-2">
-            <View className="flex-row items-center justify-center">
+          <View className="items-center mb-2">
+            <View className="flex-row items-center">
               <View
                 className={`w-2 h-2 rounded-full mr-2 ${
                   bleEnabled ? "bg-[#c0f667]" : "bg-red-500"
@@ -74,10 +90,10 @@ export default function RootLayout() {
               />
               <Text
                 className={`text-xs ${
-                  darkMode ? "text-[#f5f5f5]/60" : "text-[#100C08]/60"
+                  darkMode ? "text-white/60" : "text-black/60"
                 }`}
               >
-                Bluetooth {bleEnabled ? "Connected" : "Disconnected"}
+                Bluetooth {bleEnabled ? "Enabled" : "Disabled"}
               </Text>
             </View>
           </View>
