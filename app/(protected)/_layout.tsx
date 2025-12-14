@@ -1,4 +1,4 @@
-import { Slot } from "expo-router";
+import { Redirect, Slot } from "expo-router";
 import { Bluetooth, BluetoothOff, Moon, Radio, Sun } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
@@ -10,10 +10,12 @@ import {
 } from "react-native";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
 import "../../global.css";
+import { useAuth } from "@clerk/clerk-expo";
 
 export default function RootLayout() {
   const [darkMode, setDarkMode] = useState(true);
   const [bleEnabled, setBleEnabled] = useState<null | boolean>(null);
+  const {isSignedIn}  = useAuth()
 
   const enableBluetooth = async () => {
     try {
@@ -42,6 +44,10 @@ export default function RootLayout() {
 
     checkBluetooth();
   }, []);
+
+  if (!isSignedIn){
+    return <Redirect href="/(auth)/signin"/>
+  }
 
   return (
     <SafeAreaView

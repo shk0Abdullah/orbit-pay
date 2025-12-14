@@ -8,6 +8,7 @@ export default defineSchema({
     phone: v.string(),
     cnic: v.string(),
     createdAt: v.number(),
+    balance : v.number(),
   })
     .index("by_phone", ["phone"])
     .index("by_cnic", ["cnic"])

@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 async function hashCNIC(cnic: string): Promise<string> {
@@ -53,8 +53,20 @@ export const createOrGetUser = mutation({
       phone,
       cnic: cnicHash,
       createdAt: Date.now(),
+      balance : 0,
     });
 
     return await ctx.db.get(userId);
+  },
+});
+
+
+export const getUserByClerkId = query({
+  args: { clerkId: v.string() },
+  async handler(ctx, { clerkId }) {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))
+      .first();
   },
 });

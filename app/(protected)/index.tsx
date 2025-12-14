@@ -1,5 +1,7 @@
 // app/index.tsx
-import { useUser } from "@clerk/clerk-expo";
+import { api } from "@/convex/_generated/api";
+import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useQuery } from "convex/react";
 import { Link } from "expo-router";
 import {
   ArrowDownLeft,
@@ -11,13 +13,24 @@ import {
   Zap,
 } from "lucide-react-native";
 import { Text, TouchableOpacity, View } from "react-native";
+import { SignOutButton } from "../components/SignOutButton";
 
 export default function Home() {
   const { user } = useUser();
+  const { userId } = useAuth();
+
+
+  const dbUser = useQuery(
+    api.users.getUserByClerkId,
+    userId ? { clerkId: userId } : "skip"
+  );
+
+
 
   return (
     <View className="flex-1 justify-between">
       {/* Header */}
+      <SignOutButton />
 
       {/* Balance Card */}
       <View className="bg-[#4710cb] rounded-3xl p-5 mb-4 shadow-2xl">
@@ -34,7 +47,7 @@ export default function Home() {
         </View>
 
         <Text className="text-[#c0f667] text-4xl font-extrabold mb-3">
-          PKR 12,450
+          PKR {dbUser?.balance ?? 0}
         </Text>
 
         <View className="bg-[#100C08]/20 rounded-2xl p-3">
@@ -103,7 +116,7 @@ export default function Home() {
             <Text className="text-[#f5f5f5] text-xs font-semibold mb-1">
               Instant
             </Text>
-            <Text className="text-[#f5f5f5]/60 text-xs">
+            <Text className="text-[#f5f5f5]/6=0 text-xs">
               Real-time settlement
             </Text>
           </View>
