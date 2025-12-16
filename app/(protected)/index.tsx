@@ -19,13 +19,10 @@ export default function Home() {
   const { user } = useUser();
   const { userId } = useAuth();
 
-
   const dbUser = useQuery(
     api.users.getUserByClerkId,
     userId ? { clerkId: userId } : "skip"
   );
-
-
 
   return (
     <View className="flex-1 justify-between">
@@ -33,7 +30,7 @@ export default function Home() {
       <SignOutButton />
 
       {/* Balance Card */}
-      <View className="bg-[#4710cb] rounded-3xl p-5 mb-4 shadow-2xl">
+      <View className=" rounded-3xl p-5 mb-4 shadow-2xl">
         <View className="flex-row items-center justify-between mb-3">
           <View className="flex-row items-center">
             <Wallet size={14} color="#c0f667" />
@@ -47,7 +44,7 @@ export default function Home() {
         </View>
 
         <Text className="text-[#c0f667] text-4xl font-extrabold mb-3">
-          PKR {dbUser?.balance ?? 0}
+          PKR {dbUser?.balance}
         </Text>
 
         <View className="bg-[#100C08]/20 rounded-2xl p-3">

@@ -70,13 +70,13 @@ export default function BluetoothClient() {
       Animated.sequence([
         Animated.timing(scanPulse, {
           toValue: 1.2,
-          duration: 800,
+          duration: 500,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
         Animated.timing(scanPulse, {
           toValue: 1,
-          duration: 800,
+          duration: 500,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
@@ -86,7 +86,7 @@ export default function BluetoothClient() {
     Animated.loop(
       Animated.timing(scanRotate, {
         toValue: 1,
-        duration: 2000,
+        duration: 500,
         easing: Easing.linear,
         useNativeDriver: true,
       })
@@ -118,7 +118,8 @@ export default function BluetoothClient() {
   const connectTo = async (device: BluetoothDevice) => {
     try {
       const d = await RNBluetoothClassic.connectToDevice(device.address);
-      await d.connect();
+      await d.connect({});
+      console.log("Connected Device From Client:", d);
       setConnectedDevice(d);
       Alert.alert("Connected", "Connected to Server");
 
@@ -132,8 +133,7 @@ export default function BluetoothClient() {
         },
       });
     } catch (e) {
-      console.error("CONNECT ERROR", e);
-      Alert.alert("Connection Failed", "Could not connect to device");
+      console.log("CONNECT ERROR", e);
     }
   };
 

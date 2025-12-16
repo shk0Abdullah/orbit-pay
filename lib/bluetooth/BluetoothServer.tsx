@@ -5,11 +5,21 @@ import RNBluetoothClassic, {
   BluetoothDevice,
   BluetoothEventSubscription,
 } from "react-native-bluetooth-classic";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 
 export default function BluetoothServer() {
+  const { user } = useUser();
   const [, setServerSocketId] = useState<string | null>(null);
   const [connection, setConnection] = useState<BluetoothDevice | null>(null);
   const [receivedPayment, setReceivedPayment] = useState<any>(null);
+  const router = useRouter();
+
+  const createBluetoothPayment = useMutation(
+    api.payments.createBluetoothPayment
+  );
 
   const [readSubscription, setReadSubscription] =
     useState<BluetoothEventSubscription | null>(null);
@@ -31,7 +41,7 @@ export default function BluetoothServer() {
   /** STEP 2: Start Server / Accept Connection */
   const startServer = async () => {
     try {
-      console.log("Don't Click Again MF I am started");
+      console.log("Don't Click Agan MF I am started");
       const server = await RNBluetoothClassic.accept({});
 
       setServerSocketId(server.id);
@@ -41,6 +51,19 @@ export default function BluetoothServer() {
       listenForMessages(server);
     } catch {}
   };
+  const cleanupAndDisconnect = async (device: BluetoothDevice) => {
+    try {
+      readSubscription?.remove();
+      setReadSubscription(null);
+
+      await RNBluetoothClassic.disconnectFromDevice(device.id);
+      console.log("Disconnected from device:", device.id);
+
+      setConnection(null);
+    } catch (err) {
+      console.log("Disconnect cleanup error:", err);
+    }
+  };
 
   /** STEP 3: Listen for incoming data */
   const listenForMessages = (device: BluetoothDevice) => {
@@ -48,7 +71,7 @@ export default function BluetoothServer() {
       console.log("I am not listening");
       return;
     }
-
+    console.log(device.id);
     const sub = RNBluetoothClassic.onDeviceRead(device.id, async (event) => {
       try {
         console.log("RAW DATA:", event.data);
@@ -57,6 +80,29 @@ export default function BluetoothServer() {
         console.log("PARSED:", json);
 
         setReceivedPayment(json);
+        if (!user) {
+          return;
+        }
+        try {
+          await createBluetoothPayment({
+            senderClerkId: json.senderClerkId,
+            receiverClerkId: user.id,
+            amount: json.amount,
+            bluetoothDeviceAddress: device.address,
+            bluetoothDeviceName: device.name ?? undefined,
+          });
+        } catch {
+          console.log("Payment Processing Error");
+        }
+        setTimeout(async () => {
+          await cleanupAndDisconnect(device);
+
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace("/(protected)");
+          }
+        }, 5000);
       } catch (err) {
         console.log("JSON PARSE ERROR:", err);
       }

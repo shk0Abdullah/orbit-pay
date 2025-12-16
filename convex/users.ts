@@ -9,7 +9,6 @@ async function hashCNIC(cnic: string): Promise<string> {
     .join("");
 }
 
-
 function normalizePhone(phone: string) {
   const digits = phone.replace(/-/g, "");
   return `+92${digits.slice(1)}`;
@@ -38,14 +37,21 @@ export const createOrGetUser = mutation({
       .withIndex("by_phone", (q) => q.eq("phone", phone))
       .first();
 
-    if (phoneExists) throw new Error("Phone number already registered");
+    if (phoneExists) {
+      console.log(" phone number pehle kisi k pas hai");
+
+      return;
+    }
 
     const cnicExists = await ctx.db
       .query("users")
       .withIndex("by_cnic", (q) => q.eq("cnic", cnicHash))
       .first();
 
-    if (cnicExists) throw new Error("CNIC already registered");
+    if (cnicExists) {
+      console.log("cnic pehle kisi k pas hai");
+      return;
+    }
 
     const userId = await ctx.db.insert("users", {
       clerkId: args.clerkId,
@@ -53,13 +59,12 @@ export const createOrGetUser = mutation({
       phone,
       cnic: cnicHash,
       createdAt: Date.now(),
-      balance : 0,
+      balance: 0,
     });
 
     return await ctx.db.get(userId);
   },
 });
-
 
 export const getUserByClerkId = query({
   args: { clerkId: v.string() },
