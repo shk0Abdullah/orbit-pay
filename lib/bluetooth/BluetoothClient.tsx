@@ -28,7 +28,9 @@ export default function BluetoothClient() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Animation values for scanner
+  /** 🔒 CONNECTION LOCK (CRITICAL) */
+  const connectingRef = useRef(false);
+
   const scanPulse = useRef(new Animated.Value(1)).current;
   const scanRotate = useRef(new Animated.Value(0)).current;
 
@@ -45,25 +47,75 @@ export default function BluetoothClient() {
       startScanAnimation();
 
       const paired = await RNBluetoothClassic.getBondedDevices();
-      const unpaired = await RNBluetoothClassic.startDiscovery();
+      const discoveryPromise = RNBluetoothClassic.startDiscovery();
 
-      const combined: BluetoothDevice[] = [...paired];
+      setTimeout(() => {
+        RNBluetoothClassic.cancelDiscovery();
+      }, 4000);
 
+      const unpaired = await discoveryPromise;
+
+      const combined = [...paired];
       unpaired.forEach((d) => {
-        if (!combined.find((pd) => pd.address === d.address)) {
+        if (!combined.find((p) => p.address === d.address)) {
           combined.push(d);
         }
       });
 
       setDevices(combined);
-    } catch (err) {
-      console.error("Scan failed", err);
-      Alert.alert("Error", "Failed to fetch devices");
+    } catch {
+      Alert.alert("Scan failed");
     } finally {
       setLoading(false);
       stopScanAnimation();
     }
   };
+
+  const connectTo = async (device: BluetoothDevice) => {
+    if (connectingRef.current) {
+      console.log("CLIENT: already connecting");
+      return;
+    }
+
+    try {
+      connectingRef.current = true;
+
+      /** ❗ MUST stop discovery */
+      await RNBluetoothClassic.cancelDiscovery();
+
+      console.log("CLIENT: connecting to", device.address);
+
+      /** ✅ ONLY ONE CONNECT CALL */
+      const d = await RNBluetoothClassic.connectToDevice(device.address);
+
+      console.log("CLIENT: connected");
+
+      setConnectedDevice(d);
+
+      router.push({
+        pathname: "/(protected)/bluetooth/send-payment",
+        params: {
+          deviceId: d.id,
+          deviceName: d.name ?? "Unknown",
+          deviceAddress: d.address,
+        },
+      });
+    } catch (err) {
+      console.log("CLIENT CONNECT ERROR:", err);
+      Alert.alert("Connection failed");
+    } finally {
+      connectingRef.current = false;
+    }
+  };
+
+  const pairDevice = async (device: BluetoothDevice) => {
+    const paired = await RNBluetoothClassic.pairDevice(device.address);
+    if (paired) scanAllDevices();
+  };
+
+  useEffect(() => {
+    enableBluetooth();
+  }, []);
 
   const startScanAnimation = () => {
     Animated.loop(
@@ -71,13 +123,11 @@ export default function BluetoothClient() {
         Animated.timing(scanPulse, {
           toValue: 1.2,
           duration: 500,
-          easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
         Animated.timing(scanPulse, {
           toValue: 1,
           duration: 500,
-          easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
       ])
@@ -99,47 +149,6 @@ export default function BluetoothClient() {
     scanPulse.setValue(1);
     scanRotate.setValue(0);
   };
-
-  const pairDevice = async (device: BluetoothDevice) => {
-    try {
-      const paired = await RNBluetoothClassic.pairDevice(device.address);
-      if (paired) {
-        Alert.alert("Paired", `${device.name} paired successfully`);
-        scanAllDevices();
-      } else {
-        Alert.alert("Failed", "Pairing failed");
-      }
-    } catch (err) {
-      console.error("Pairing error", err);
-      Alert.alert("Error", "Pairing failed");
-    }
-  };
-
-  const connectTo = async (device: BluetoothDevice) => {
-    try {
-      const d = await RNBluetoothClassic.connectToDevice(device.address);
-      await d.connect({});
-      console.log("Connected Device From Client:", d);
-      setConnectedDevice(d);
-      Alert.alert("Connected", "Connected to Server");
-
-      // Navigate to send payment screen
-      router.push({
-        pathname: "/(protected)/bluetooth/send-payment",
-        params: {
-          deviceId: d.id,
-          deviceName: d.name || "Unknown Device",
-          deviceAddress: d.address,
-        },
-      });
-    } catch (e) {
-      console.log("CONNECT ERROR", e);
-    }
-  };
-
-  useEffect(() => {
-    enableBluetooth();
-  }, []);
 
   const spin = scanRotate.interpolate({
     inputRange: [0, 1],
