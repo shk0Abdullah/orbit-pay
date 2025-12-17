@@ -1,26 +1,26 @@
 // app/(protected)/bluetooth/send-payment.tsx
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/clerk-expo";
+import { useQuery } from "convex/react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Radio,
+  Send,
+  Wallet,
+} from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
-import {
-  ArrowLeft,
-  Send,
-  Wallet,
-  CheckCircle,
-  Radio,
-} from "lucide-react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useUser } from "@clerk/clerk-expo";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 
 export default function SendPayment() {
   const { user } = useUser();
@@ -86,11 +86,14 @@ export default function SendPayment() {
 
       // Show success for 2 seconds then go back
       setTimeout(async () => {
-        const disconnect = await RNBluetoothClassic.disconnectFromDevice(
-          deviceId as string
-        );
-        console.log("Gonna Disconnect", disconnect);
-
+        try {
+          const disconnect = await RNBluetoothClassic.disconnectFromDevice(
+            deviceId as string
+          );
+          console.log("Gonna Disconnect", disconnect);
+        } catch {
+          console.log("Already Disconnected This promise is failing");
+        }
         if (router.canGoBack()) {
           router.back();
         } else {

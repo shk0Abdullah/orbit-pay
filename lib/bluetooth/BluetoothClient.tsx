@@ -28,7 +28,6 @@ export default function BluetoothClient() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  /** 🔒 CONNECTION LOCK (CRITICAL) */
   const connectingRef = useRef(false);
 
   const scanPulse = useRef(new Animated.Value(1)).current;
@@ -80,12 +79,10 @@ export default function BluetoothClient() {
     try {
       connectingRef.current = true;
 
-      /** ❗ MUST stop discovery */
       await RNBluetoothClassic.cancelDiscovery();
 
       console.log("CLIENT: connecting to", device.address);
 
-      /** ✅ ONLY ONE CONNECT CALL */
       const d = await RNBluetoothClassic.connectToDevice(device.address);
 
       console.log("CLIENT: connected");

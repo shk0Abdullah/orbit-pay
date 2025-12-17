@@ -111,6 +111,7 @@ export default function BluetoothServer() {
       console.log("SERVER CLEANUP ERROR:", err);
     } finally {
       connectedRef.current = false;
+      console.log("I should be here");
       setConnection(null);
     }
   };
