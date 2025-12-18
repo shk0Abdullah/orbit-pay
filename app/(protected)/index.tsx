@@ -1,4 +1,5 @@
 // app/index.tsx
+import { SignOutButton } from "@/app/components/SignOutButton";
 import { api } from "@/convex/_generated/api";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
@@ -13,7 +14,6 @@ import {
   Zap,
 } from "lucide-react-native";
 import { Text, TouchableOpacity, View } from "react-native";
-import { SignOutButton } from "../components/SignOutButton";
 
 export default function Home() {
   const { user } = useUser();
