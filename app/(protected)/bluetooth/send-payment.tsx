@@ -1,25 +1,29 @@
 // app/(protected)/bluetooth/send-payment.tsx
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/clerk-expo";
+import { useQuery } from "convex/react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Radio,
+  Send,
+  Wallet,
+} from "lucide-react-native";
 import React, { useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
-import {
-  ArrowLeft,
-  Send,
-  Wallet,
-  CheckCircle,
-  Radio,
-} from "lucide-react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
 
 export default function SendPayment() {
+  const { user } = useUser();
   const router = useRouter();
   const params = useLocalSearchParams();
   const { deviceId, deviceName, deviceAddress } = params;
@@ -29,26 +33,45 @@ export default function SendPayment() {
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const balanceData = useQuery(api.payments.getBalance, {
+    clerkId: user?.id!,
+  });
+
   const sendPayment = async () => {
+    console.log(balanceData?.balance);
+    console.log(parseFloat(amount) <= balanceData?.balance!);
+    console.log(typeof balanceData?.balance);
     if (!amount || parseFloat(amount) <= 0) {
       Alert.alert("Invalid Amount", "Please enter a valid amount");
+      setSuccess(false);
+      return;
+    }
+    if (parseInt(amount) >= balanceData?.balance!) {
+      Alert.alert("Insufficient Amount");
+      setSuccess(false);
+
       return;
     }
 
     if (!senderName.trim()) {
       Alert.alert("Invalid Name", "Please enter your name");
+      setSuccess(false);
+
       return;
     }
 
     if (!deviceId) {
       Alert.alert("Error", "Device not connected");
+      setSuccess(false);
+
       return;
     }
 
     const payload = {
       amount: parseFloat(amount),
       currency: "PKR",
-      sender: senderName.trim(),
+      senderName: senderName.trim(),
+      senderClerkId: user?.id,
       time: Date.now(),
     };
 
@@ -62,9 +85,21 @@ export default function SendPayment() {
       setSuccess(true);
 
       // Show success for 2 seconds then go back
-      setTimeout(() => {
-        router.back();
-      }, 2000);
+      setTimeout(async () => {
+        try {
+          const disconnect = await RNBluetoothClassic.disconnectFromDevice(
+            deviceId as string
+          );
+          console.log("Gonna Disconnect", disconnect);
+        } catch {
+          console.log("Already Disconnected This promise is failing");
+        }
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace("/(protected)");
+        }
+      }, 5000);
     } catch (err) {
       console.error("WRITE ERROR", err);
       Alert.alert("Send Failed", "Could not send payment");
@@ -75,22 +110,24 @@ export default function SendPayment() {
 
   if (success) {
     return (
-      <View className="flex-1 bg-[#100C08] items-center justify-center px-6">
-        <View className="items-center">
-          <View className="w-24 h-24 rounded-full bg-[#c0f667] items-center justify-center mb-6">
-            <CheckCircle size={48} color="#100C08" strokeWidth={3} />
+      <>
+        <View className="flex-1 bg-[#100C08] items-center justify-center px-6">
+          <View className="items-center">
+            <View className="w-24 h-24 rounded-full bg-[#c0f667] items-center justify-center mb-6">
+              <CheckCircle size={48} color="#100C08" strokeWidth={3} />
+            </View>
+            <Text className="text-[#f5f5f5] text-3xl font-bold mb-2">
+              Payment Sent!
+            </Text>
+            <Text className="text-[#c0f667] text-xl font-semibold mb-4">
+              PKR {amount}
+            </Text>
+            <Text className="text-[#f5f5f5]/60 text-sm text-center">
+              Successfully transferred to {deviceName}
+            </Text>
           </View>
-          <Text className="text-[#f5f5f5] text-3xl font-bold mb-2">
-            Payment Sent!
-          </Text>
-          <Text className="text-[#c0f667] text-xl font-semibold mb-4">
-            PKR {amount}
-          </Text>
-          <Text className="text-[#f5f5f5]/60 text-sm text-center">
-            Successfully transferred to {deviceName}
-          </Text>
         </View>
-      </View>
+      </>
     );
   }
 

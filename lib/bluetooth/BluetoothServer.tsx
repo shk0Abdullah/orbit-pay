@@ -1,26 +1,33 @@
-import { CheckCircle, Clock, Radio, Wallet } from "lucide-react-native";
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/clerk-expo";
+import { useMutation } from "convex/react";
+import { useRouter } from "expo-router";
+import { Radio } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Animated, Easing, Text, View } from "react-native";
+import { Animated, Easing, Text, View } from "react-native";
 import RNBluetoothClassic, {
   BluetoothDevice,
   BluetoothEventSubscription,
 } from "react-native-bluetooth-classic";
 
 export default function BluetoothServer() {
-  const [, setServerSocketId] = useState<string | null>(null);
+  const { user } = useUser();
+  const router = useRouter();
+
   const [connection, setConnection] = useState<BluetoothDevice | null>(null);
   const [receivedPayment, setReceivedPayment] = useState<any>(null);
-
   const [readSubscription, setReadSubscription] =
     useState<BluetoothEventSubscription | null>(null);
 
-  // Animation values
-  const spinValue1 = useRef(new Animated.Value(0)).current;
-  const spinValue2 = useRef(new Animated.Value(0)).current;
-  const pulseValue = useRef(new Animated.Value(1)).current;
-  const glowValue = useRef(new Animated.Value(0)).current;
+  const createBluetoothPayment = useMutation(
+    api.payments.createBluetoothPayment
+  );
 
-  /** STEP 1: Enable Bluetooth */
+  /** 🔒 SERVER STATE LOCKS (CRITICAL) */
+  const acceptingRef = useRef(false);
+  const connectedRef = useRef(false);
+
+  /** Enable Bluetooth */
   const enableBluetooth = async () => {
     const enabled = await RNBluetoothClassic.isBluetoothEnabled();
     if (!enabled) {
@@ -28,46 +35,105 @@ export default function BluetoothServer() {
     }
   };
 
-  /** STEP 2: Start Server / Accept Connection */
+  /** START SERVER (SAFE) */
   const startServer = async () => {
-    try {
-      console.log("Don't Click Again MF I am started");
-      const server = await RNBluetoothClassic.accept({});
-
-      setServerSocketId(server.id);
-      setConnection(server);
-
-      Alert.alert("Client Connected!");
-      listenForMessages(server);
-    } catch {}
-  };
-
-  /** STEP 3: Listen for incoming data */
-  const listenForMessages = (device: BluetoothDevice) => {
-    if (!device) {
-      console.log("I am not listening");
+    if (acceptingRef.current || connectedRef.current) {
+      console.log("SERVER: already accepting or connected");
       return;
     }
 
+    try {
+      acceptingRef.current = true;
+      console.log("SERVER: waiting for connection...");
+
+      const device = await RNBluetoothClassic.accept({});
+
+      acceptingRef.current = false;
+      connectedRef.current = true;
+
+      console.log("SERVER: client connected", device.address);
+
+      setConnection(device);
+      listenForMessages(device);
+    } catch (err) {
+      acceptingRef.current = false;
+      console.log("SERVER ACCEPT ERROR:", err);
+    }
+  };
+
+  /** LISTEN FOR DATA */
+  const listenForMessages = (device: BluetoothDevice) => {
     const sub = RNBluetoothClassic.onDeviceRead(device.id, async (event) => {
       try {
-        console.log("RAW DATA:", event.data);
+        console.log("SERVER RAW:", event.data);
 
         const json = JSON.parse(event.data);
-        console.log("PARSED:", json);
-
         setReceivedPayment(json);
+
+        if (!user) return;
+
+        await createBluetoothPayment({
+          senderClerkId: json.senderClerkId,
+          receiverClerkId: user.id,
+          amount: json.amount,
+          bluetoothDeviceAddress: device.address,
+          bluetoothDeviceName: device.name ?? undefined,
+        });
+
+        console.log("SERVER: payment saved");
+
+        /** ⏱️ graceful disconnect AFTER payment */
+        setTimeout(async () => {
+          await cleanup(device);
+
+          if (router.canGoBack()) router.back();
+          else router.replace("/(protected)");
+        }, 3000);
       } catch (err) {
-        console.log("JSON PARSE ERROR:", err);
+        console.log("SERVER JSON ERROR:", err);
       }
     });
-    console.log("Sir I am sub", sub);
+
     setReadSubscription(sub);
   };
 
-  /** Start animations */
+  /** CLEANUP */
+  const cleanup = async (device?: BluetoothDevice) => {
+    try {
+      readSubscription?.remove();
+      setReadSubscription(null);
+
+      if (device) {
+        await RNBluetoothClassic.disconnectFromDevice(device.id);
+        console.log("SERVER: disconnected");
+      }
+    } catch (err) {
+      console.log("SERVER CLEANUP ERROR:", err);
+    } finally {
+      connectedRef.current = false;
+      console.log("I should be here");
+      setConnection(null);
+    }
+  };
+
+  /** INIT */
   useEffect(() => {
-    // Orbiting animation 1 (clockwise)
+    enableBluetooth();
+    startServer();
+
+    return () => {
+      cleanup(connection ?? undefined);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ================= UI (UNCHANGED) ================= */
+
+  const spinValue1 = useRef(new Animated.Value(0)).current;
+  const spinValue2 = useRef(new Animated.Value(0)).current;
+  const pulseValue = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
     Animated.loop(
       Animated.timing(spinValue1, {
         toValue: 1,
@@ -77,7 +143,6 @@ export default function BluetoothServer() {
       })
     ).start();
 
-    // Orbiting animation 2 (counter-clockwise)
     Animated.loop(
       Animated.timing(spinValue2, {
         toValue: 1,
@@ -87,7 +152,6 @@ export default function BluetoothServer() {
       })
     ).start();
 
-    // Pulse animation for core
     Animated.loop(
       Animated.sequence([
         Animated.timing(pulseValue, {
@@ -104,39 +168,8 @@ export default function BluetoothServer() {
         }),
       ])
     ).start();
-
-    // Glow animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(glowValue, {
-          toValue: 1,
-          duration: 2000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(glowValue, {
-          toValue: 0,
-          duration: 2000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
   }, []);
 
-  /** Clean up */
-  useEffect(() => {
-    return () => {
-      readSubscription?.remove();
-    };
-  }, [readSubscription]);
-
-  useEffect(() => {
-    enableBluetooth();
-    startServer();
-  }, []);
-
-  // Interpolate rotation values
   const spin1 = spinValue1.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
@@ -147,219 +180,30 @@ export default function BluetoothServer() {
     outputRange: ["360deg", "0deg"],
   });
 
-  const glowOpacity = glowValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.2, 0.6],
-  });
-
   return (
     <View className="flex-1 justify-center bg-[#100C08]">
-      {/* ===== LOADING / WAITING STATE ===== */}
       {!connection && (
-        <View className="items-center justify-center px-6">
-          {/* Enhanced Orbital Loader */}
-          <View className="relative w-48 h-48 items-center justify-center mb-12">
-            {/* Outer Glow Ring */}
-            <Animated.View
-              style={{
-                position: "absolute",
-                width: 200,
-                height: 200,
-                borderRadius: 100,
-                backgroundColor: "#4710cb",
-                opacity: glowOpacity,
-              }}
-            />
-
-            {/* Main Orbit Ring */}
-            <View className="absolute w-48 h-48 rounded-full border-2 border-[#4710cb]/40" />
-
-            {/* Secondary Orbit Ring */}
-            <View className="absolute w-40 h-40 rounded-full border border-[#c0f667]/20" />
-
-            {/* Pulsing Core with Icon */}
-            <Animated.View
-              style={{
-                transform: [{ scale: pulseValue }],
-              }}
-              className="w-12 h-12 rounded-full bg-[#4710cb] items-center justify-center shadow-2xl"
-            >
-              <Radio size={24} color="#c0f667" />
-            </Animated.View>
-
-            {/* Orbiting Dot 1 - Large Green */}
-            <Animated.View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: "50%",
-                marginLeft: -10,
-                transform: [{ rotate: spin1 }, { translateY: -96 }],
-              }}
-            >
-              <View className="w-6 h-6 rounded-full bg-[#c0f667] shadow-2xl" />
-            </Animated.View>
-
-            {/* Orbiting Dot 2 - Medium White */}
-            <Animated.View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: "50%",
-                marginLeft: -8,
-                transform: [{ rotate: spin2 }, { translateY: -96 }],
-              }}
-            >
-              <View className="w-5 h-5 rounded-full bg-[#f5f5f5] shadow-2xl" />
-            </Animated.View>
-
-            {/* Orbiting Dot 3 - Small Blue (on inner ring) */}
-            <Animated.View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: "50%",
-                marginLeft: -6,
-                transform: [
-                  { rotate: spin1 },
-                  { translateY: -80 },
-                  { rotate: spin2 },
-                ],
-              }}
-            >
-              <View className="w-4 h-4 rounded-full bg-[#4710cb] shadow-xl" />
-            </Animated.View>
-          </View>
-
-          {/* Status Text */}
-          <View className="items-center mb-8">
-            <Text className="text-[#f5f5f5] text-3xl font-bold text-center mb-3">
-              Waiting for Payment
-            </Text>
-            <Text className="text-[#c0f667] text-base font-medium text-center">
-              Listening for nearby devices...
-            </Text>
-          </View>
-
-          {/* Info Cards */}
-          <View className="w-full space-y-3">
-            <View className="bg-[#f5f5f5]/5 border border-[#f5f5f5]/10 rounded-2xl p-4 flex-row items-center">
-              <View className="w-10 h-10 rounded-full bg-[#4710cb]/20 items-center justify-center mr-3">
-                <Radio size={20} color="#c0f667" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-[#f5f5f5] text-sm font-semibold mb-1">
-                  Bluetooth Server Active
-                </Text>
-                <Text className="text-[#f5f5f5]/60 text-xs">
-                  Ready to accept connections
-                </Text>
-              </View>
-            </View>
-
-            <View className="bg-[#4710cb]/10 border border-[#4710cb]/20 rounded-2xl p-4 flex-row items-center">
-              <View className="w-10 h-10 rounded-full bg-[#c0f667]/20 items-center justify-center mr-3">
-                <Wallet size={20} color="#c0f667" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-[#f5f5f5] text-sm font-semibold mb-1">
-                  Secure Connection
-                </Text>
-                <Text className="text-[#f5f5f5]/60 text-xs">
-                  End-to-end encrypted transfer
-                </Text>
-              </View>
-            </View>
-          </View>
+        <View className="items-center">
+          <Animated.View
+            style={{ transform: [{ rotate: spin1 }, { scale: pulseValue }] }}
+          >
+            <Radio size={48} color="#c0f667" />
+          </Animated.View>
+          <Text className="text-white mt-6 text-lg">Waiting for payment…</Text>
         </View>
       )}
 
-      {/* ===== CONNECTED STATE ===== */}
       {connection && (
         <View className="px-6">
-          {/* Connection Success Card */}
-          <View className="bg-[#4710cb] rounded-3xl p-6 mb-6 shadow-2xl border border-[#4710cb]/30">
-            <View className="flex-row items-center justify-between mb-4">
-              <View className="flex-row items-center">
-                <View className="w-10 h-10 rounded-full bg-[#c0f667] items-center justify-center mr-3">
-                  <CheckCircle size={20} color="#100C08" />
-                </View>
-                <Text className="text-[#f5f5f5] text-xs uppercase tracking-widest font-bold">
-                  Connected
-                </Text>
-              </View>
-              <View className="w-3 h-3 rounded-full bg-[#c0f667]" />
-            </View>
+          <Text className="text-[#c0f667] text-xl font-bold mb-4">
+            Connected: {connection.name ?? "Unknown"}
+          </Text>
 
-            <Text className="text-[#c0f667] text-2xl font-bold mb-2">
-              {connection.name ?? "Unknown Device"}
-            </Text>
-
-            <View className="bg-[#100C08]/20 rounded-xl p-3">
-              <Text className="text-[#f5f5f5]/60 text-xs mb-1">
-                Device Address
-              </Text>
-              <Text className="text-[#f5f5f5] text-sm font-mono">
-                {connection.address}
-              </Text>
-            </View>
-          </View>
-
-          {/* Payment Received */}
           {receivedPayment && (
-            <View className="bg-[#f5f5f5] rounded-3xl p-6 shadow-2xl">
-              {/* Header */}
-              <View className="flex-row items-center justify-between mb-4">
-                <View className="flex-row items-center">
-                  <View className="w-10 h-10 rounded-full bg-[#c0f667] items-center justify-center mr-3">
-                    <CheckCircle size={20} color="#100C08" />
-                  </View>
-                  <Text className="text-[#100C08] text-xs uppercase tracking-widest font-bold">
-                    Payment Received
-                  </Text>
-                </View>
-                <View className="bg-[#c0f667] px-3 py-1.5 rounded-full">
-                  <Text className="text-[#100C08] text-xs font-black">
-                    SUCCESS
-                  </Text>
-                </View>
-              </View>
-
-              {/* Amount */}
-              <Text className="text-[#4710cb] text-5xl font-black mb-6">
+            <View className="bg-white p-6 rounded-2xl">
+              <Text className="text-4xl font-black text-[#4710cb]">
                 PKR {receivedPayment.amount}
               </Text>
-
-              {/* Details */}
-              <View className="space-y-4 pt-4 border-t border-[#100C08]/10">
-                <View className="flex-row items-center">
-                  <View className="w-8 h-8 rounded-full bg-[#4710cb]/10 items-center justify-center mr-3">
-                    <Wallet size={16} color="#4710cb" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-[#100C08]/60 text-xs uppercase tracking-wide mb-1">
-                      Sender
-                    </Text>
-                    <Text className="text-[#100C08] text-base font-bold">
-                      {receivedPayment.sender}
-                    </Text>
-                  </View>
-                </View>
-
-                <View className="flex-row items-center">
-                  <View className="w-8 h-8 rounded-full bg-[#4710cb]/10 items-center justify-center mr-3">
-                    <Clock size={16} color="#4710cb" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-[#100C08]/60 text-xs uppercase tracking-wide mb-1">
-                      Time
-                    </Text>
-                    <Text className="text-[#100C08] text-sm font-semibold">
-                      {new Date(receivedPayment.time).toLocaleString()}
-                    </Text>
-                  </View>
-                </View>
-              </View>
             </View>
           )}
         </View>

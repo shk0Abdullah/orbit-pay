@@ -31,11 +31,12 @@ export default function SignUpScreen() {
       Alert.alert("Invalid CNIC", "Use format 12345-6789123-4");
       return;
     }
-
+    console.log("Started to create the user");
     await signUp.create({
       emailAddress: signup.email,
       password: signup.password,
     });
+    console.log("User created on Clerk");
 
     await signUp.prepareEmailAddressVerification({
       strategy: "email_code",
@@ -51,14 +52,14 @@ export default function SignUpScreen() {
 
     if (attempt.status === "complete") {
       await setActive({ session: attempt.createdSessionId });
-
+      console.log("Gonna create the User in Convex");
       await createUser({
         clerkId: attempt.createdUserId!,
         email: signup.email,
         phone: signup.phone,
         cnic: signup.cnic,
       });
-
+      console.log("User Created on Convex");
       router.replace("/(protected)");
     }
   };
@@ -101,18 +102,14 @@ export default function SignUpScreen() {
       <Text className="text-3xl font-bold text-black mb-10">OrbitPay</Text>
 
       <View className="w-full">
-        <Text className="text-2xl font-semibold text-black mb-4">
-          Sign Up
-        </Text>
+        <Text className="text-2xl font-semibold text-black mb-4">Sign Up</Text>
 
         <TextInput
           autoCapitalize="none"
           value={signup.email}
           placeholder="Enter email"
           placeholderTextColor="#444"
-          onChangeText={(v) =>
-            setSignup((s) => ({ ...s, email: v }))
-          }
+          onChangeText={(v) => setSignup((s) => ({ ...s, email: v }))}
           className="w-full bg-white/80 p-4 rounded-xl mb-4 text-black"
         />
 
@@ -121,9 +118,7 @@ export default function SignUpScreen() {
           value={signup.password}
           placeholder="Enter password"
           placeholderTextColor="#444"
-          onChangeText={(v) =>
-            setSignup((s) => ({ ...s, password: v }))
-          }
+          onChangeText={(v) => setSignup((s) => ({ ...s, password: v }))}
           className="w-full bg-white/80 p-4 rounded-xl mb-4 text-black"
         />
 
@@ -131,9 +126,7 @@ export default function SignUpScreen() {
           value={signup.phone}
           placeholder="Phone (0300-1234567)"
           placeholderTextColor="#444"
-          onChangeText={(v) =>
-            setSignup((s) => ({ ...s, phone: v }))
-          }
+          onChangeText={(v) => setSignup((s) => ({ ...s, phone: v }))}
           className="w-full bg-white/80 p-4 rounded-xl mb-4 text-black"
         />
 
@@ -141,9 +134,7 @@ export default function SignUpScreen() {
           value={signup.cnic}
           placeholder="CNIC (12345-6789123-4)"
           placeholderTextColor="#444"
-          onChangeText={(v) =>
-            setSignup((s) => ({ ...s, cnic: v }))
-          }
+          onChangeText={(v) => setSignup((s) => ({ ...s, cnic: v }))}
           className="w-full bg-white/80 p-4 rounded-xl mb-6 text-black"
         />
 
