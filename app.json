@@ -19,7 +19,13 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "permissions": [
-        "CAMERA"
+        "CAMERA",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_ADVERTISE"
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -62,9 +68,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "d4c2e2b0-dd1d-4f34-be68-1118dae8a3a4"
+        "projectId": "ed491d0b-fee5-4220-9532-f0081eb776d6"
       }
-    },
-    "owner": "essambhatti"
+    }
   }
 }

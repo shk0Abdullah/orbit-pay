@@ -318,7 +318,7 @@ export default function RootLayout() {
   const navItems = [
     { name: "Home", icon: Home, route: "/(app)/home" },
     { name: "Cards", icon: CreditCard, route: "/(app)/cards" },
-    { name: "QR", icon: QrCode, route: "/(app)/qr", isCenter: true },
+    { name: "QR", icon: QrCode, route: "/(scan)/", isCenter: true },
     { name: "Activity", icon: Bell, route: "/(app)/activity" },
     { name: "Profile", icon: User, route: "/(app)/profile" },
   ];

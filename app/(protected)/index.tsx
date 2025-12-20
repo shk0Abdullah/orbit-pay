@@ -4,16 +4,9 @@ import { api } from "@/convex/_generated/api";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
 import { Link } from "expo-router";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Clock,
-  Radio,
-  TrendingUp,
-  Wallet,
-  Zap,
-} from "lucide-react-native";
+import { ArrowDownLeft, ArrowUpRight, Wallet } from "lucide-react-native";
 import { Text, TouchableOpacity, View } from "react-native";
+import Widget from "../components/SortableList/Widget";
 
 export default function Home() {
   const { user } = useUser();
@@ -93,8 +86,8 @@ export default function Home() {
         <Text className="text-[#f5f5f5] text-base font-bold mb-3">
           Features
         </Text>
-        <View className="flex-row flex-wrap gap-2">
-          {/* Bluetooth Transfer */}
+        <Widget />
+        {/* <View className="flex-row flex-wrap gap-2">
           <View className="w-[48%] bg-[#f5f5f5]/10 rounded-2xl p-3 border border-[#f5f5f5]/10">
             <View className="w-8 h-8 rounded-full bg-[#4710cb]/20 items-center justify-center mb-2">
               <Radio size={16} color="#c0f667" />
@@ -105,7 +98,6 @@ export default function Home() {
             <Text className="text-[#f5f5f5]/60 text-xs">Offline transfers</Text>
           </View>
 
-          {/* Instant Payment */}
           <View className="w-[48%] bg-[#f5f5f5]/10 rounded-2xl p-3 border border-[#f5f5f5]/10">
             <View className="w-8 h-8 rounded-full bg-[#c0f667]/20 items-center justify-center mb-2">
               <Zap size={16} color="#c0f667" />
@@ -118,7 +110,6 @@ export default function Home() {
             </Text>
           </View>
 
-          {/* Decentralized */}
           <View className="w-[48%] bg-[#f5f5f5]/10 rounded-2xl p-3 border border-[#f5f5f5]/10">
             <View className="w-8 h-8 rounded-full bg-[#4710cb]/20 items-center justify-center mb-2">
               <TrendingUp size={16} color="#4710cb" />
@@ -129,7 +120,6 @@ export default function Home() {
             <Text className="text-[#f5f5f5]/60 text-xs">Crypto enabled</Text>
           </View>
 
-          {/* History */}
           <View className="w-[48%] bg-[#f5f5f5]/10 rounded-2xl p-3 border border-[#f5f5f5]/10">
             <View className="w-8 h-8 rounded-full bg-[#c0f667]/20 items-center justify-center mb-2">
               <Clock size={16} color="#f5f5f5" />
@@ -141,7 +131,7 @@ export default function Home() {
               Track all transactions
             </Text>
           </View>
-        </View>
+        </View> */}
       </View>
 
       {/* Recent Activity */}
