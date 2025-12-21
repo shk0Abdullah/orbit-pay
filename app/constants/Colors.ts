@@ -6,6 +6,7 @@ const white = "#fff";
 const blue = "#4227F2";
 
 const Colors = {
+  smokeyWhite: "#f5f5f5",
   text: white,
   blackText: black,
   lightText: darkGray,
