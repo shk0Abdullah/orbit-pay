@@ -184,9 +184,13 @@ import Font from "@/app/constants/Fonts";
 import FontSize from "@/app/constants/FontSize";
 import { Spacing } from "@/app/constants/Spacing";
 import { activitiesData, defaultCoin, MyKey } from "@/app/data";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
+
+import { useQuery } from "convex/react";
 import {
   SafeAreaView,
   ScrollView,
@@ -197,6 +201,13 @@ import {
 } from "react-native";
 
 const Home = () => {
+  // const { user } = useUser();
+  const { userId } = useAuth();
+
+  const dbUser = useQuery(
+    api.users.getUserByClerkId,
+    userId ? { clerkId: userId } : "skip"
+  );
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <SafeAreaView>
@@ -262,7 +273,7 @@ const Home = () => {
                   fontFamily: Font["poppins-regular"],
                 }}
               >
-                $
+                $ {dbUser?.balance}
               </Text>
               <TextInput
                 style={{
@@ -280,7 +291,7 @@ const Home = () => {
               }}
             >
               <TouchableOpacity
-                onPress={() => router.push("/")}
+                onPress={() => router.push("/(protected)/bluetooth/client")}
                 style={{
                   backgroundColor: Colors.primary,
                   paddingHorizontal: Spacing * 3,
@@ -317,6 +328,9 @@ const Home = () => {
                   justifyContent: "center",
                   alignItems: "center",
                   width: "45%",
+                }}
+                onPress={() => {
+                  router.push("/(protected)/bluetooth/server");
                 }}
               >
                 <Text
