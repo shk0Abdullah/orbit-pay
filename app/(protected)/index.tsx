@@ -27,6 +27,14 @@ const Home = () => {
     api.users.getUserByClerkId,
     userId ? { clerkId: userId } : "skip"
   );
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text); // Web/JS fallback
+      alert("Copied!");
+    } catch {
+      alert("Clipboard not supported on this device in Expo Go.");
+    }
+  };
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -83,7 +91,17 @@ const Home = () => {
               >
                 {MyKey}
               </Text>
-              <Ionicons name="copy-outline" size={16} color={Colors.primary} />
+
+              <TouchableOpacity
+                onPress={() => copyToClipboard(MyKey)}
+                style={{ marginLeft: 8 }}
+              >
+                <Ionicons
+                  name="copy-outline"
+                  size={16}
+                  color={Colors.primary}
+                />
+              </TouchableOpacity>
             </View>
 
             <View style={{ flexDirection: "row", alignSelf: "center" }}>
