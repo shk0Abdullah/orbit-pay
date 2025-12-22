@@ -9,7 +9,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
-
+import * as Clipboard from "expo-clipboard";
 import { useQuery } from "convex/react";
 import {
   SafeAreaView,
@@ -19,21 +19,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
+import { walletAtom } from "@/app/store/Atom";
+import { useAtom } from "jotai";
 const Home = () => {
   const { userId } = useAuth();
-
+  const [wallet] = useAtom(walletAtom);
   const dbUser = useQuery(
     api.users.getUserByClerkId,
     userId ? { clerkId: userId } : "skip"
   );
   const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text); // Web/JS fallback
-      alert("Copied!");
-    } catch {
-      alert("Clipboard not supported on this device in Expo Go.");
-    }
+    await Clipboard.setStringAsync(text);
   };
 
   return (
@@ -89,7 +85,7 @@ const Home = () => {
                 }}
                 numberOfLines={1}
               >
-                {MyKey}
+                {wallet?.publicKey.toBase58()}
               </Text>
 
               <TouchableOpacity

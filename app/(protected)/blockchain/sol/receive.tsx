@@ -7,7 +7,7 @@ import {
   Alert,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-// import * as Clipboard from "expo-clipboard";
+import * as Clipboard from "expo-clipboard";
 import { Copy, Wallet } from "lucide-react-native";
 
 const COLORS = {
@@ -22,8 +22,7 @@ const DUMMY_SOL_ADDRESS = "7YkQ9FvFZ4WcX4Yp8gD7mP6s9uR2A9kB4ZxV8sEoFh2M";
 
 const ReceiveSol = () => {
   const handleCopy = async () => {
-    // await Clipboard.setStringAsync(DUMMY_SOL_ADDRESS);
-    Alert.alert("Copied ✅", "Solana address copied to clipboard");
+    await Clipboard.setStringAsync(DUMMY_SOL_ADDRESS);
   };
 
   return (
