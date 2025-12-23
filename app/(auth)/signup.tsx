@@ -3,22 +3,52 @@ import { Link, useRouter } from "expo-router";
 import * as React from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useAtom } from "jotai";
-import { signupAtom } from "../store/signup";
+import { signupAtom, walletAtom, balanceAtom } from "@/app/store/Atom";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-
+import { Keypair } from "@solana/web3.js";
+import { useEffect } from "react";
+import { useState } from "react";
+import {
+  createWallet,
+  loadWallet,
+  getSolBalance,
+} from "@/lib/Solana/walletCreate";
 const phoneRegex = /^\d{4}-\d{7}$/;
 const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
+  const [, setWallet] = useAtom(walletAtom);
+  const [, setBalance] = useAtom(balanceAtom);
   const router = useRouter();
   const [signup, setSignup] = useAtom(signupAtom);
   const [pendingVerification, setPendingVerification] = React.useState(false);
   const [code, setCode] = React.useState("");
 
   const createUser = useMutation(api.users.createOrGetUser);
+  useEffect(() => {
+    init();
+  }, []);
 
+  async function init() {
+    const w = await loadWallet();
+    if (w) {
+      setWallet(w);
+      refreshBalance(w.publicKey.toBase58());
+    }
+  }
+
+  async function refreshBalance(pubKey: string) {
+    const bal = await getSolBalance(pubKey);
+    setBalance(bal);
+  }
+
+  async function onCreateWallet() {
+    const pubKey = await createWallet();
+    Alert.alert("Wallet Created", pubKey);
+    init();
+  }
   const onSignUpPress = async () => {
     if (!isLoaded) return;
 
@@ -37,7 +67,7 @@ export default function SignUpScreen() {
       password: signup.password,
     });
     console.log("User created on Clerk");
-
+    onCreateWallet();
     await signUp.prepareEmailAddressVerification({
       strategy: "email_code",
     });
@@ -64,7 +94,6 @@ export default function SignUpScreen() {
     }
   };
 
-  /* ---------------- Verification Screen ---------------- */
   if (pendingVerification) {
     return (
       <View className="flex-1 bg-[#c0f667] justify-center items-center px-6">
