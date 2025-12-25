@@ -37,4 +37,20 @@ export default defineSchema({
   })
     .index("by_sender", ["senderUserId"])
     .index("by_receiver", ["receiverUserId"]),
+
+  credit_predictions: defineTable({
+    prediction_id: v.string(),
+    predicted_score: v.string(),
+    confidence: v.float64(),
+    probabilities: v.any(),
+    input_data: v.any(),
+    model_version: v.string(),
+    timestamp: v.string(),
+    clerkId: v.optional(v.string()),
+    customer_id: v.optional(v.string()),
+    createdAt: v.float64(),
+  })
+    .index("by_clerkId", ["clerkId"])
+    .index("by_customer_id", ["customer_id"]) 
+    .index("by_prediction_id", ["prediction_id"]),
 });
