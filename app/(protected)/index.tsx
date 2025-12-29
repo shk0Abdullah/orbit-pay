@@ -3,15 +3,19 @@ import Colors from "@/app/constants/Colors";
 import Font from "@/app/constants/Fonts";
 import FontSize from "@/app/constants/FontSize";
 import { Spacing } from "@/app/constants/Spacing";
-import { activitiesData, defaultCoin, MyKey } from "@/app/data";
+import { activitiesData, defaultCoin } from "@/app/data";
+import { balanceAtom, walletAtom } from "@/app/store/Atom";
 import { api } from "@/convex/_generated/api";
+import { getSolBalance, loadWallet } from "@/lib/Solana/walletCreate"; // adjust path if needed
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React from "react";
-import * as Clipboard from "expo-clipboard";
 import { useQuery } from "convex/react";
+import * as Clipboard from "expo-clipboard";
+import { router } from "expo-router";
+import { useAtom } from "jotai";
+import React, { useEffect } from "react";
 import {
+  Alert,
   SafeAreaView,
   ScrollView,
   Text,
@@ -19,11 +23,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { walletAtom } from "@/app/store/Atom";
-import { useAtom } from "jotai";
+
 const Home = () => {
   const { userId } = useAuth();
-  const [wallet] = useAtom(walletAtom);
+  const [balance, setBalance] = useAtom(balanceAtom);
+  const [wlt, setWalletAddress] = useAtom(walletAtom);
+
   const dbUser = useQuery(
     api.users.getUserByClerkId,
     userId ? { clerkId: userId } : "skip"
@@ -31,7 +36,23 @@ const Home = () => {
   const copyToClipboard = async (text: string) => {
     await Clipboard.setStringAsync(text);
   };
+  useEffect(() => {
+    (async () => {
+      const wallet = await loadWallet();
+      console.log(wallet);
+      console.log(wallet?.publicKey.toBase58());
+      console.log(balance);
 
+      if (!wallet) {
+        Alert.alert("Wallet not found", "Create a wallet first.");
+        return;
+      }
+
+      setWalletAddress(wallet.publicKey.toBase58());
+      const bal = await getSolBalance(wallet.publicKey.toBase58());
+      setBalance(bal);
+    })();
+  }, []);
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <SafeAreaView>
@@ -85,11 +106,11 @@ const Home = () => {
                 }}
                 numberOfLines={1}
               >
-                {wallet?.publicKey.toBase58()}
+                {wlt}
               </Text>
 
               <TouchableOpacity
-                onPress={() => copyToClipboard(MyKey)}
+                onPress={() => copyToClipboard(wlt)}
                 style={{ marginLeft: 8 }}
               >
                 <Ionicons

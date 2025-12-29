@@ -3,7 +3,7 @@ import { atom } from "jotai";
 
 import type { Keypair } from "@solana/web3.js";
 
-export const walletAtom = atom<Keypair | null>(null);
+export const walletAtom = atom<Keypair | string>("");
 
 export const balanceAtom = atom<number>(0);
 
