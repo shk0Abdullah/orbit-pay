@@ -2,10 +2,19 @@ const tintColor = "#AEF21F";
 const black = "#000000";
 const lightBlack = "#1B1B1B";
 const darkGray = "#AFAFAF";
-const white = "#fff";
+const white = "#ffffff";
 const blue = "#4227F2";
 
+/* App theme colors (from portfolio UI) */
+const darkNavy = "#05050F";
+const primaryIndigo = "#1D1856";
+const secondaryIndigo = "#575886";
+const accentBlue = "#52A4F0";
+const softWhite = "#EFF3FE";
+const softBlueGray = "#C4DBF7";
+
 const Colors = {
+  /* Existing */
   smokeyWhite: "#f5f5f5",
   text: white,
   blackText: black,
@@ -22,6 +31,25 @@ const Colors = {
   black,
   seccuess: "#2d932dff",
   danger: "rgba(175, 77, 77, 1)",
-};
+
+  /* New – Portfolio App Theme */
+  portfolio: {
+    backgroundDark: darkNavy,
+    backgroundPrimary: primaryIndigo,
+    backgroundSecondary: secondaryIndigo,
+
+    card: primaryIndigo,
+    cardSecondary: secondaryIndigo,
+
+    accent: accentBlue,
+
+    textPrimary: softWhite,
+    textSecondary: softBlueGray,
+    textMuted: secondaryIndigo,
+
+    chartPrimary: accentBlue,
+    chartSecondary: secondaryIndigo,
+  },
+} as const;
 
 export default Colors;
