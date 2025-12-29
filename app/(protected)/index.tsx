@@ -106,11 +106,11 @@ const Home = () => {
                 }}
                 numberOfLines={1}
               >
-                {wlt}
+                {/* {wlt} */}
               </Text>
 
               <TouchableOpacity
-                onPress={() => copyToClipboard(wlt)}
+                onPress={() => copyToClipboard("sand")}
                 style={{ marginLeft: 8 }}
               >
                 <Ionicons
