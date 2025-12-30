@@ -11,6 +11,7 @@ import {
   Image,
   ImageBackground,
   ScrollView,
+  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -27,47 +28,42 @@ import {
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 
+import { useAtom } from "jotai";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
+import { indexActionSheet } from "../store/Atom";
 
 export default function RootLayout() {
   const segments = useSegments();
-  const [bleEnabled, setBleEnabled] = useState<null | boolean>(null);
-  const { isSignedIn } = useAuth();
   const router = useRouter();
-  // const pathname = usePathname();
+  const { isSignedIn } = useAuth();
+  const [indexSheet, setindexActionSheet] = useAtom(indexActionSheet);
+  const [bleEnabled, setBleEnabled] = useState<boolean | null>(null);
+  const [showActivitySheet, setShowActivitySheet] = useState(false);
 
+  /* ---------------- Bluetooth ---------------- */
   const enableBluetooth = async () => {
     try {
       const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-      console.log("Enabled:", enabled);
       if (!enabled) {
-        console.log("gonna wait for the await");
         await RNBluetoothClassic.requestBluetoothEnabled();
       }
-
-      const updatedStatus = await RNBluetoothClassic.isBluetoothEnabled();
-      console.log(updatedStatus);
-      setBleEnabled(updatedStatus);
-
-      Alert.alert(updatedStatus ? "Bluetooth Enabled" : "Bluetooth Disabled");
+      const updated = await RNBluetoothClassic.isBluetoothEnabled();
+      setBleEnabled(updated);
+      Alert.alert(updated ? "Bluetooth Enabled" : "Bluetooth Disabled");
     } catch {
       Alert.alert("Failed to enable Bluetooth");
     }
   };
 
   useEffect(() => {
-    const checkBluetooth = async () => {
-      const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-      setBleEnabled(enabled);
-    };
-
-    checkBluetooth();
+    RNBluetoothClassic.isBluetoothEnabled().then(setBleEnabled);
   }, []);
 
   if (!isSignedIn) {
     return <Redirect href="/(auth)/signin" />;
   }
 
+  /* ---------------- Bottom Tabs ---------------- */
   const navItems = [
     {
       name: "Home",
@@ -78,8 +74,7 @@ export default function RootLayout() {
     {
       name: "Activity",
       icon: SmartphoneNfc,
-      route: "/(app)/activity",
-      segments: ["(app)", "activity"],
+      isAction: true,
     },
     {
       name: "QR",
@@ -102,8 +97,9 @@ export default function RootLayout() {
     },
   ];
 
-  const isActive = (target: string[]) => {
-    if (segments.length !== target.length) return false;
+  const isActive = (target?: string[]) => {
+    if (!target) return false;
+    if (segments.length < target.length) return false;
     return target.every((seg, i) => segments[i] === seg);
   };
 
@@ -113,57 +109,46 @@ export default function RootLayout() {
       className="flex-1"
       resizeMode="cover"
     >
-      <View className={"flex-1"}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
-          className="flex-1"
-        >
-          <View className="flex-1 px-4 mt-4 pt-6 m-2 p-3 pb-24">
-            {/* Enhanced Header */}
-            <View className="flex-row justify-between items-center pt-4 pb-3 border-b border-[#f5f5f5]/10">
-              {/* Logo */}
-              <View className="flex-row items-center">
-                <Image
-                  source={require("@/assets/images/withoutbg.png")}
-                  style={{ width: 40, height: 40 }}
-                  resizeMode="contain"
-                />
-              </View>
+      <View className="flex-1">
+        {/* ================= CONTENT ================= */}
+        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+          <View className="px-4 pt-6 pb-28">
+            {/* Header */}
+            <View className="flex-row justify-between items-center pb-4 border-b border-white/10">
+              <Image
+                source={require("@/assets/images/withoutbg.png")}
+                className="w-10 h-10"
+                resizeMode="contain"
+              />
 
-              {/* Action Buttons */}
-              <View className="flex-row items-center gap-2">
-                {/* Bluetooth toggle */}
-                <TouchableOpacity
-                  onPress={enableBluetooth}
-                  className={`p-2.5 rounded-full shadow-lg ${
-                    bleEnabled ? "bg-[#001C71]" : "bg-[#99838395]"
-                  }`}
-                >
-                  {bleEnabled ? (
-                    <Bluetooth size={20} color="#86D2FF" />
-                  ) : (
-                    <BluetoothOff size={20} color="#f5f5f5" />
-                  )}
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                onPress={enableBluetooth}
+                className={`p-2.5 rounded-full ${
+                  bleEnabled ? "bg-[#001C71]" : "bg-[#99838395]"
+                }`}
+              >
+                {bleEnabled ? (
+                  <Bluetooth size={20} color="#86D2FF" />
+                ) : (
+                  <BluetoothOff size={20} color="#fff" />
+                )}
+              </TouchableOpacity>
             </View>
 
-            {/* App content */}
-            <View className="flex-1">
-              <Slot />
-            </View>
+            {/* Screens */}
+            <Slot />
           </View>
         </ScrollView>
 
-        {/* Custom Bottom Navigation */}
+        {/* ================= BOTTOM NAV ================= */}
         <View className="absolute bottom-0 left-0 right-0 px-4 pb-6">
-          <View className="bg-[#86D2FF] rounded-3xl px-6 py-5">
+          <View className="bg-[#86D2FF] rounded-3xl px-6 py-4">
             <View className="flex-row justify-around items-center">
               {navItems.map((item, index) => {
                 const Icon = item.icon;
                 const active = isActive(item.segments);
 
+                /* -------- Center QR -------- */
                 if (item.isCenter) {
                   return (
                     <TouchableOpacity
@@ -180,6 +165,20 @@ export default function RootLayout() {
                   );
                 }
 
+                /* -------- Activity (Action Sheet) -------- */
+                if (item.isAction) {
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => setShowActivitySheet(true)}
+                      className="items-center"
+                    >
+                      <Icon size={26} color="#001C71" strokeWidth={2} />
+                    </TouchableOpacity>
+                  );
+                }
+
+                /* -------- Normal Tabs -------- */
                 return (
                   <TouchableOpacity
                     key={index}
@@ -190,11 +189,11 @@ export default function RootLayout() {
                   >
                     <Icon
                       size={26}
-                      color={active ? "#001C71" : "#001C71"}
+                      color="#001C71"
                       strokeWidth={active ? 3 : 2}
                     />
 
-                    {/* ACTIVE UNDERLINE */}
+                    {/* Active underline */}
                     <View
                       className={`mt-1 h-[3px] rounded-full ${
                         active ? "w-6 bg-[#001C71]" : "w-0"
@@ -206,6 +205,131 @@ export default function RootLayout() {
             </View>
           </View>
         </View>
+
+        {/* ================= ACTIVITY SHEET ================= */}
+        {showActivitySheet && (
+          <View className="absolute inset-0 justify-end">
+            {/* Overlay */}
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => setShowActivitySheet(false)}
+              className="absolute inset-0 bg-black/40"
+            />
+
+            {/* Sheet */}
+            <View className="bg-[#ffffff] rounded-t-3xl px-6 py-5">
+              <View className="items-center mb-4">
+                <View className="w-10 h-1.5 bg-gray-600 rounded-full" />
+              </View>
+
+              <Text className="text-lg font-bold text-gray-900 mb-4">
+                Wallet Actions
+              </Text>
+
+              {/* RECEIVE */}
+              <TouchableOpacity
+                onPress={() => {
+                  setShowActivitySheet(false);
+                  router.push("/(protected)/bluetooth/server");
+                }}
+                className="border border-gray-200 rounded-2xl p-4 mb-3 flex-row items-center"
+              >
+                <View className="w-10 h-10 bg-blue-100 rounded-xl items-center justify-center">
+                  <QrCode size={20} color="#2563EB" />
+                </View>
+                <View className="ml-4">
+                  <Text className="font-semibold text-gray-900">
+                    Receive Tokens
+                  </Text>
+                  <Text className="text-gray-500 text-sm">Via Bluetooth</Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* SEND */}
+              <TouchableOpacity
+                onPress={() => {
+                  setShowActivitySheet(false);
+                  router.push("/(protected)/bluetooth/client");
+                }}
+                className="border border-gray-200 rounded-2xl p-4 flex-row items-center"
+              >
+                <View className="w-10 h-10 bg-green-100 rounded-xl items-center justify-center">
+                  <SmartphoneNfc size={20} color="#16A34A" />
+                </View>
+                <View className="ml-4">
+                  <Text className="font-semibold text-gray-900">
+                    Send Tokens
+                  </Text>
+                  <Text className="text-gray-500 text-sm">
+                    Transfer Money via Bluetooth
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {indexSheet && (
+          <View className="absolute inset-0 justify-end">
+            {/* Overlay */}
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => setindexActionSheet(false)}
+              className="absolute inset-0 bg-black/40"
+            />
+
+            {/* Sheet */}
+            <View className="bg-[#ffffff] rounded-t-3xl px-6 py-5">
+              <View className="items-center mb-4">
+                <View className="w-10 h-1.5 bg-gray-600 rounded-full" />
+              </View>
+
+              <Text className="text-lg font-bold text-gray-900 mb-4">
+                Wallet Actions
+              </Text>
+
+              {/* RECEIVE */}
+              <TouchableOpacity
+                onPress={() => {
+                  setShowActivitySheet(false);
+                  router.push("/(protected)/bluetooth/server");
+                }}
+                className="border border-gray-200 rounded-2xl p-4 mb-3 flex-row items-center"
+              >
+                <View className="w-10 h-10 bg-blue-100 rounded-xl items-center justify-center">
+                  <QrCode size={20} color="#2563EB" />
+                </View>
+                <View className="ml-4">
+                  <Text className="font-semibold text-gray-900">
+                    Receive Tokens
+                  </Text>
+                  <Text className="text-gray-500 text-sm">Via OrbitPay</Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* SEND */}
+              <TouchableOpacity
+                onPress={() => {
+                  setShowActivitySheet(false);
+                  router.push("/(protected)/bluetooth/client");
+                }}
+                className="border border-gray-200 rounded-2xl p-4 flex-row items-center"
+              >
+                <View className="w-10 h-10 bg-green-100 rounded-xl items-center justify-center">
+                  <SmartphoneNfc size={20} color="#16A34A" />
+                </View>
+                <View className="ml-4">
+                  <Text className="font-semibold text-gray-900">
+                    Send Tokens
+                  </Text>
+                  <Text className="text-gray-500 text-sm">
+                    Transfer Money via Bluetooth
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
     </ImageBackground>
   );

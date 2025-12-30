@@ -51,9 +51,8 @@ export default function Profile() {
       className="flex-1 px-4 pt-6"
       contentContainerStyle={{ paddingBottom: 120 }}
     >
-      {/* ================= CURRENT ACCOUNT ================= */}
       <View className="bg-[#0B1624] rounded-3xl p-5 mb-6">
-        <Text className="text-white text-xl font-bold mb-4">
+        <Text className="text-white text-2xl font-bold mb-4">
           Current Account
         </Text>
 
@@ -66,8 +65,9 @@ export default function Profile() {
             {walletAddress && (
               <View className="flex-row items-center mt-1">
                 <Text className="text-[#8FA3BF] text-sm">
-                  {walletAddress.slice(0, 8)}...
-                  {walletAddress.slice(-6)}
+                  {typeof walletAddress === "string"
+                    ? `${walletAddress.slice(0, 8)}...${walletAddress.slice(-6)}`
+                    : ""}
                 </Text>
 
                 <TouchableOpacity onPress={copyWallet} className="ml-3">
