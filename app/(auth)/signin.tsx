@@ -1,7 +1,13 @@
 import { useSignIn } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
 import React from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ImageBackground,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Page() {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -12,7 +18,6 @@ export default function Page() {
   const [pendingVerification, setPendingVerification] = React.useState(false);
   const [code, setCode] = React.useState("");
 
-  // Handle the submission of the sign-in form
   const onSignInPress = async () => {
     if (!isLoaded) return;
 
@@ -57,65 +62,75 @@ export default function Page() {
     }
   };
 
-
   return (
-    <View className="flex-1 bg-[#c0f667] justify-center items-center px-6">
-      {/* App Title */}
-      <Text className="text-3xl font-bold text-black mb-10">OrbitPay</Text>
+    <ImageBackground
+      source={require("@/assets/bg.png")}
+      resizeMode="cover"
+      className="flex-1"
+    >
+      <View className="flex-1 justify-center px-6 bg-black/20">
+        <View className="w-full rounded-2xl p-6 bg-white/10 backdrop-blur-md">
+          {pendingVerification ? (
+            <View>
+              <TextInput
+                placeholder="Enter verification code"
+                value={code}
+                onChangeText={setCode}
+                placeholderTextColor="#86D2FF"
+                className="w-full bg-white/20 p-4 rounded-xl mb-4 text-white"
+              />
 
-      <View className="w-full">
-        {pendingVerification ?
-          <View>
-            <TextInput
-              placeholder="Enter verification code"
-              value={code}
-              onChangeText={setCode}
-              placeholderTextColor="#444"
-              className="w-full bg-white/80 p-4 rounded-xl mb-4 text-black"
-            />
-            <TouchableOpacity onPress={onVerifyPress}>
-              <Text>Verify</Text>
-            </TouchableOpacity>
-          </View> :
-          <View>
-            <Text className="text-2xl font-semibold text-black mb-4">Sign In</Text>
-
-            <TextInput
-              autoCapitalize="none"
-              value={emailAddress}
-              placeholder="Enter email"
-              placeholderTextColor="#444"
-              className="w-full bg-white/80 p-4 rounded-xl mb-4 text-black"
-              onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
-            />
-
-
-            <TextInput
-              value={password}
-              placeholder="Enter password"
-              secureTextEntry={true}
-              placeholderTextColor="#444"
-              className="w-full bg-white/80 p-4 rounded-xl mb-6 text-black"
-              onChangeText={(password) => setPassword(password)}
-            />
-
-            <TouchableOpacity
-              onPress={onSignInPress}
-              className="bg-black py-4 rounded-xl w-full"
-            >
-              <Text className="text-center text-white font-semibold text-lg">
-                Continue
-              </Text>
-            </TouchableOpacity>
-
-
-            <View className="flex flex-row justify-center mt-4">
-              <Link href="/(auth)/signup">
-                <Text className="text-black underline">Sign up</Text>
-              </Link>
+              <TouchableOpacity
+                onPress={onVerifyPress}
+                className="bg-[#1A459D] py-4 rounded-xl"
+              >
+                <Text className="text-center text-white font-semibold text-lg">
+                  Verify
+                </Text>
+              </TouchableOpacity>
             </View>
-          </View>
-        }</View></View>
+          ) : (
+            <View>
+              <Text className="text-2xl font-semibold text-[#d5d1d1] mb-4 text-center">
+                Sign In
+              </Text>
 
+              <TextInput
+                autoCapitalize="none"
+                value={emailAddress}
+                placeholder="Email"
+                placeholderTextColor="#000"
+                className="w-full bg-white/20 p-4 rounded-xl mb-2 text-white"
+                onChangeText={setEmailAddress}
+              />
+
+              <TextInput
+                value={password}
+                placeholder="Password"
+                secureTextEntry
+                placeholderTextColor="#000"
+                className="w-full bg-white/20 p-4 rounded-xl mb-6 text-white"
+                onChangeText={setPassword}
+              />
+
+              <TouchableOpacity
+                onPress={onSignInPress}
+                className="bg-[#000000] py-3 rounded-xl w-full"
+              >
+                <Text className="text-center text-[#bdbdbd] font-semibold text-lg">
+                  Continue
+                </Text>
+              </TouchableOpacity>
+
+              <View className="flex-row justify-center mt-4">
+                <Link href="/(auth)/signup">
+                  <Text className="text-[#4A90E2] underline">Sign up</Text>
+                </Link>
+              </View>
+            </View>
+          )}
+        </View>
+      </View>
+    </ImageBackground>
   );
 }

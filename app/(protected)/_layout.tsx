@@ -1,488 +1,336 @@
-// import { useAuth } from "@clerk/clerk-expo";
-// import { Redirect, Slot, usePathname, useRouter } from "expo-router";
-// import {
-//   Bell,
-//   Bluetooth,
-//   BluetoothOff,
-//   CreditCard,
-//   Home,
-//   Moon,
-//   QrCode,
-//   Radio,
-//   Sun,
-//   User,
-// } from "lucide-react-native";
-// import { useEffect, useState } from "react";
-// import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
-// import RNBluetoothClassic from "react-native-bluetooth-classic";
-
-// import "../../global.css";
-
-// export default function RootLayout() {
-//   const [darkMode, setDarkMode] = useState(true);
-//   const [bleEnabled, setBleEnabled] = useState<null | boolean>(null);
-//   const { isSignedIn } = useAuth();
-//   const router = useRouter();
-//   const pathname = usePathname();
-
-//   const enableBluetooth = async () => {
-//     try {
-//       const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-//       console.log("Enabled:", enabled);
-//       if (!enabled) {
-//         console.log("gonna wait for the await");
-//         await RNBluetoothClassic.requestBluetoothEnabled();
-//       }
-
-//       const updatedStatus = await RNBluetoothClassic.isBluetoothEnabled();
-//       console.log(updatedStatus);
-//       setBleEnabled(updatedStatus);
-
-//       Alert.alert(updatedStatus ? "Bluetooth Enabled" : "Bluetooth Disabled");
-//     } catch {
-//       Alert.alert("Failed to enable Bluetooth");
-//     }
-//   };
-
-//   useEffect(() => {
-//     const checkBluetooth = async () => {
-//       const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-//       setBleEnabled(enabled);
-//     };
-
-//     checkBluetooth();
-//   }, []);
-
-//   if (!isSignedIn) {
-//     return <Redirect href="/(auth)/signin" />;
-//   }
-
-//   const navItems = [
-//     { name: "Home", icon: Home, route: "/(app)/home" },
-//     { name: "Cards", icon: CreditCard, route: "/(app)/cards" },
-//     { name: "QR", icon: QrCode, route: "/(app)/qr", isCenter: true },
-//     { name: "Activity", icon: Bell, route: "/(app)/activity" },
-//     { name: "Profile", icon: User, route: "/(app)/profile" },
-//   ];
-
-//   const handleNavigation = (route: any) => {
-//     router.push(route);
-//   };
-
-//   const isActive = (route: string) => pathname === route;
-
-//   return (
-//     <View className={`flex-1 ${darkMode ? "bg-[#100C08]" : "bg-[#f5f5f5]"}`}>
-//       <ScrollView
-//         showsVerticalScrollIndicator={false}
-//         showsHorizontalScrollIndicator={false}
-//         className="flex-1"
-//       >
-//         <View className="flex-1 px-4 mt-4 pt-6 m-2 p-3 pb-24">
-//           {/* Enhanced Header */}
-//           <View className="flex-row justify-between items-center pt-4 pb-3 border-b border-[#f5f5f5]/10">
-//             {/* Logo & Brand */}
-//             <View className="flex-row items-center">
-//               <View className="w-9 h-9 rounded-full bg-[#4710cb] items-center justify-center mr-2.5 shadow-lg">
-//                 <Radio size={18} color="#c0f667" />
-//               </View>
-//               <View>
-//                 <Text
-//                   className={`text-xl font-bold ${
-//                     darkMode ? "text-[#f5f5f5]" : "text-[#100C08]"
-//                   }`}
-//                 >
-//                   OrbitPay
-//                 </Text>
-//                 <Text
-//                   className={`text-xs ${
-//                     darkMode ? "text-[#f5f5f5]/40" : "text-[#100C08]/40"
-//                   }`}
-//                 >
-//                   Secure Payments
-//                 </Text>
-//               </View>
-//             </View>
-
-//             {/* Action Buttons */}
-//             <View className="flex-row items-center gap-2">
-//               {/* Dark mode toggle */}
-//               <TouchableOpacity
-//                 onPress={() => setDarkMode((prev) => !prev)}
-//                 className={`p-2.5 rounded-full ${
-//                   darkMode ? "bg-[#f5f5f5]/10" : "bg-[#100C08]/10"
-//                 }`}
-//               >
-//                 {darkMode ? (
-//                   <Sun size={20} color="#c0f667" />
-//                 ) : (
-//                   <Moon size={20} color="#4710cb" />
-//                 )}
-//               </TouchableOpacity>
-
-//               {/* Bluetooth toggle */}
-//               <TouchableOpacity
-//                 onPress={enableBluetooth}
-//                 className={`p-2.5 rounded-full shadow-lg ${
-//                   bleEnabled ? "bg-[#4710cb]" : "bg-[#f5f5f5]/20"
-//                 }`}
-//               >
-//                 {bleEnabled ? (
-//                   <Bluetooth size={20} color="#c0f667" />
-//                 ) : (
-//                   <BluetoothOff size={20} color="#f5f5f5" />
-//                 )}
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-
-//           {/* Bluetooth Status Indicator */}
-//           {bleEnabled !== null && (
-//             <View className="py-2">
-//               <View className="flex-row items-center justify-center">
-//                 <View
-//                   className={`w-2 h-2 rounded-full mr-2 ${
-//                     bleEnabled ? "bg-[#c0f667]" : "bg-red-500"
-//                   }`}
-//                 />
-//                 <Text
-//                   className={`text-xs ${
-//                     darkMode ? "text-[#f5f5f5]/60" : "text-[#100C08]/60"
-//                   }`}
-//                 >
-//                   Bluetooth {bleEnabled ? "Connected" : "Disconnected"}
-//                 </Text>
-//               </View>
-//             </View>
-//           )}
-
-//           {/* App content */}
-//           <View className="flex-1">
-//             <Slot />
-//           </View>
-//         </View>
-//       </ScrollView>
-
-//       {/* Custom Bottom Navigation */}
-//       <View
-//         className={`absolute bottom-0 left-0 right-0 ${
-//           darkMode ? "bg-[#1a1410]" : "bg-white"
-//         } border-t ${
-//           darkMode ? "border-[#f5f5f5]/10" : "border-[#100C08]/10"
-//         } pb-6 pt-3`}
-//         style={{
-//           shadowColor: "#000",
-//           shadowOffset: { width: 0, height: -3 },
-//           shadowOpacity: 0.1,
-//           shadowRadius: 8,
-//           elevation: 10,
-//         }}
-//       >
-//         <View className="flex-row justify-around items-center px-4">
-//           {navItems.map((item, index) => {
-//             const Icon = item.icon;
-//             const active = isActive(item.route);
-
-//             if (item.isCenter) {
-//               return (
-//                 <TouchableOpacity
-//                   key={index}
-//                   onPress={() => handleNavigation(item.route)}
-//                   className="items-center justify-center -mt-8"
-//                 >
-//                   <View
-//                     className={`w-16 h-16 rounded-full items-center justify-center shadow-lg ${
-//                       active ? "bg-[#4710cb]" : "bg-[#4710cb]/80"
-//                     }`}
-//                     style={{
-//                       shadowColor: "#4710cb",
-//                       shadowOffset: { width: 0, height: 4 },
-//                       shadowOpacity: 0.3,
-//                       shadowRadius: 8,
-//                       elevation: 8,
-//                     }}
-//                   >
-//                     <Icon size={28} color="#c0f667" />
-//                   </View>
-//                   <Text
-//                     className={`text-xs mt-1 font-semibold ${
-//                       active
-//                         ? "text-[#c0f667]"
-//                         : darkMode
-//                           ? "text-[#f5f5f5]/60"
-//                           : "text-[#100C08]/60"
-//                     }`}
-//                   >
-//                     {item.name}
-//                   </Text>
-//                 </TouchableOpacity>
-//               );
-//             }
-
-//             return (
-//               <TouchableOpacity
-//                 key={index}
-//                 onPress={() => handleNavigation(item.route)}
-//                 className="items-center justify-center py-2 px-3"
-//               >
-//                 <View
-//                   className={`items-center justify-center ${
-//                     active ? "opacity-100" : "opacity-60"
-//                   }`}
-//                 >
-//                   <Icon
-//                     size={24}
-//                     color={
-//                       active ? "#c0f667" : darkMode ? "#f5f5f5" : "#100C08"
-//                     }
-//                   />
-//                   <Text
-//                     className={`text-xs mt-1 ${
-//                       active
-//                         ? "text-[#c0f667] font-semibold"
-//                         : darkMode
-//                           ? "text-[#f5f5f5]/60"
-//                           : "text-[#100C08]/60"
-//                     }`}
-//                   >
-//                     {item.name}
-//                   </Text>
-//                 </View>
-//               </TouchableOpacity>
-//             );
-//           })}
-//         </View>
-//       </View>
-//     </View>
-//   );
-// }
 import { useAuth } from "@clerk/clerk-expo";
-import { Redirect, Slot, usePathname, useRouter } from "expo-router";
 import {
-  Bell,
+  Redirect,
+  RelativePathString,
+  Slot,
+  useRouter,
+  useSegments,
+} from "expo-router";
+import {
+  Alert,
+  Image,
+  ImageBackground,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+import "@/global.css";
+import {
   Bluetooth,
   BluetoothOff,
   CreditCard,
   Home,
-  Moon,
   QrCode,
-  Radio,
-  Sun,
+  SmartphoneNfc,
   User,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import RNBluetoothClassic from "react-native-bluetooth-classic";
 
-import "../../global.css";
+import { useAtom } from "jotai";
+import RNBluetoothClassic from "react-native-bluetooth-classic";
+import { indexActionSheet } from "../store/Atom";
 
 export default function RootLayout() {
-  const [darkMode, setDarkMode] = useState(true);
-  const [bleEnabled, setBleEnabled] = useState<null | boolean>(null);
-  const { isSignedIn } = useAuth();
+  const segments = useSegments();
   const router = useRouter();
-  const pathname = usePathname();
+  const { isSignedIn } = useAuth();
+  const [indexSheet, setindexActionSheet] = useAtom(indexActionSheet);
+  const [bleEnabled, setBleEnabled] = useState<boolean | null>(null);
+  const [showActivitySheet, setShowActivitySheet] = useState(false);
 
+  /* ---------------- Bluetooth ---------------- */
   const enableBluetooth = async () => {
     try {
       const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-      console.log("Enabled:", enabled);
       if (!enabled) {
-        console.log("gonna wait for the await");
         await RNBluetoothClassic.requestBluetoothEnabled();
       }
-
-      const updatedStatus = await RNBluetoothClassic.isBluetoothEnabled();
-      console.log(updatedStatus);
-      setBleEnabled(updatedStatus);
-
-      Alert.alert(updatedStatus ? "Bluetooth Enabled" : "Bluetooth Disabled");
+      const updated = await RNBluetoothClassic.isBluetoothEnabled();
+      setBleEnabled(updated);
+      Alert.alert(updated ? "Bluetooth Enabled" : "Bluetooth Disabled");
     } catch {
       Alert.alert("Failed to enable Bluetooth");
     }
   };
 
   useEffect(() => {
-    const checkBluetooth = async () => {
-      const enabled = await RNBluetoothClassic.isBluetoothEnabled();
-      setBleEnabled(enabled);
-    };
-
-    checkBluetooth();
+    RNBluetoothClassic.isBluetoothEnabled().then(setBleEnabled);
   }, []);
 
   if (!isSignedIn) {
     return <Redirect href="/(auth)/signin" />;
   }
 
+  /* ---------------- Bottom Tabs ---------------- */
   const navItems = [
-    { name: "Home", icon: Home, route: "/(app)/home" },
-    { name: "Cards", icon: CreditCard, route: "/(app)/cards" },
-    { name: "QR", icon: QrCode, route: "/(scan)/", isCenter: true },
-    { name: "Activity", icon: Bell, route: "/(app)/activity" },
-    { name: "Profile", icon: User, route: "/(app)/profile" },
+    {
+      name: "Home",
+      icon: Home,
+      route: "/(protected)",
+      segments: ["(protected)"],
+    },
+    {
+      name: "Activity",
+      icon: SmartphoneNfc,
+      isAction: true,
+    },
+    {
+      name: "QR",
+      icon: QrCode,
+      route: "/(scan)",
+      segments: ["(scan)"],
+      isCenter: true,
+    },
+    {
+      name: "Wallet",
+      icon: CreditCard,
+      route: "/(wallet)",
+      segments: ["(wallet)"],
+    },
+    {
+      name: "Profile",
+      icon: User,
+      route: "/(protected)/profile",
+      segments: ["(protected)", "profile"],
+    },
   ];
 
-  const handleNavigation = (route: any) => {
-    router.push(route);
+  const isActive = (target?: string[]) => {
+    if (!target) return false;
+    if (segments.length < target.length) return false;
+    return target.every((seg, i) => segments[i] === seg);
   };
 
-  const isActive = (route: string) => pathname === route;
-
   return (
-    <View className={`flex-1 ${darkMode ? "bg-[#100C08]" : "bg-[#f5f5f5]"}`}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}
-        className="flex-1"
-      >
-        <View className="flex-1 px-4 mt-4 pt-6 m-2 p-3 pb-24">
-          {/* Enhanced Header */}
-          <View className="flex-row justify-between items-center pt-4 pb-3 border-b border-[#f5f5f5]/10">
-            {/* Logo & Brand */}
-            <View className="flex-row items-center">
-              <View className="w-9 h-9 rounded-full bg-[#4710cb] items-center justify-center mr-2.5 shadow-lg">
-                <Radio size={18} color="#c0f667" />
-              </View>
-              <View>
-                <Text
-                  className={`text-xl font-bold ${
-                    darkMode ? "text-[#f5f5f5]" : "text-[#100C08]"
-                  }`}
-                >
-                  OrbitPay
-                </Text>
-                <Text
-                  className={`text-xs ${
-                    darkMode ? "text-[#f5f5f5]/40" : "text-[#100C08]/40"
-                  }`}
-                >
-                  Secure Payments
-                </Text>
-              </View>
-            </View>
+    <ImageBackground
+      source={require("@/assets/screens/dashboard-bg.png")}
+      className="flex-1"
+      resizeMode="cover"
+    >
+      <View className="flex-1">
+        {/* ================= CONTENT ================= */}
+        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+          <View className="px-4 pt-6 pb-28">
+            {/* Header */}
+            <View className="flex-row justify-between items-center pb-4 border-b border-white/10">
+              <Image
+                source={require("@/assets/images/withoutbg.png")}
+                className="w-10 h-10"
+                resizeMode="contain"
+              />
 
-            {/* Action Buttons */}
-            <View className="flex-row items-center gap-2">
-              {/* Dark mode toggle */}
-              <TouchableOpacity
-                onPress={() => setDarkMode((prev) => !prev)}
-                className={`p-2.5 rounded-full ${
-                  darkMode ? "bg-[#f5f5f5]/10" : "bg-[#100C08]/10"
-                }`}
-              >
-                {darkMode ? (
-                  <Sun size={20} color="#c0f667" />
-                ) : (
-                  <Moon size={20} color="#4710cb" />
-                )}
-              </TouchableOpacity>
-
-              {/* Bluetooth toggle */}
               <TouchableOpacity
                 onPress={enableBluetooth}
-                className={`p-2.5 rounded-full shadow-lg ${
-                  bleEnabled ? "bg-[#4710cb]" : "bg-[#f5f5f5]/20"
+                className={`p-2.5 rounded-full ${
+                  bleEnabled ? "bg-[#001C71]" : "bg-[#99838395]"
                 }`}
               >
                 {bleEnabled ? (
-                  <Bluetooth size={20} color="#c0f667" />
+                  <Bluetooth size={20} color="#86D2FF" />
                 ) : (
-                  <BluetoothOff size={20} color="#f5f5f5" />
+                  <BluetoothOff size={20} color="#fff" />
                 )}
               </TouchableOpacity>
             </View>
-          </View>
 
-          {/* Bluetooth Status Indicator */}
-          {bleEnabled !== null && (
-            <View className="py-2">
-              <View className="flex-row items-center justify-center">
-                <View
-                  className={`w-2 h-2 rounded-full mr-2 ${
-                    bleEnabled ? "bg-[#c0f667]" : "bg-[#4710cb]"
-                  }`}
-                />
-                <Text
-                  className={`text-xs ${
-                    darkMode ? "text-[#f5f5f5]/60" : "text-[#100C08]/60"
-                  }`}
-                >
-                  Bluetooth {bleEnabled ? "Connected" : "Disconnected"}
-                </Text>
-              </View>
-            </View>
-          )}
-
-          {/* App content */}
-          <View className="flex-1">
+            {/* Screens */}
             <Slot />
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
 
-      {/* Custom Bottom Navigation */}
-      <View className="absolute bottom-0 left-0 right-0 px-4 pb-8">
-        <View
-          className="bg-[#9c9c9c] rounded-3xl px-6 py-5"
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: -4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 12,
-            elevation: 12,
-          }}
-        >
-          <View className="flex-row justify-around items-center">
-            {navItems.map((item, index) => {
-              const Icon = item.icon;
-              const active = isActive(item.route);
+        {/* ================= BOTTOM NAV ================= */}
+        <View className="absolute bottom-0 left-0 right-0 px-4 pb-6">
+          <View className="bg-[#86D2FF] rounded-3xl px-6 py-4">
+            <View className="flex-row justify-around items-center">
+              {navItems.map((item, index) => {
+                const Icon = item.icon;
+                const active = isActive(item.segments);
 
-              if (item.isCenter) {
+                /* -------- Center QR -------- */
+                if (item.isCenter) {
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() =>
+                        router.push(item.route as RelativePathString)
+                      }
+                      className="-mt-10"
+                    >
+                      <View className="w-16 h-16 rounded-full bg-[#001C71] items-center justify-center">
+                        <Icon size={30} color="#86D2FF" />
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }
+
+                /* -------- Activity (Action Sheet) -------- */
+                if (item.isAction) {
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => setShowActivitySheet(true)}
+                      className="items-center"
+                    >
+                      <Icon size={26} color="#001C71" strokeWidth={2} />
+                    </TouchableOpacity>
+                  );
+                }
+
+                /* -------- Normal Tabs -------- */
                 return (
                   <TouchableOpacity
                     key={index}
-                    onPress={() => handleNavigation(item.route)}
-                    className="items-center justify-center -mt-10"
+                    onPress={() =>
+                      router.push(item.route as RelativePathString)
+                    }
+                    className="items-center"
                   >
-                    <View
-                      className={`w-16 h-16 rounded-full items-center justify-center shadow-lg ${
-                        active ? "bg-[#4710cb]" : "bg-[#4710cb]/90"
-                      }`}
-                      style={{
-                        shadowColor: "#4710cb",
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.4,
-                        shadowRadius: 10,
-                        elevation: 10,
-                      }}
-                    >
-                      <Icon size={28} color="#c0f667" />
-                    </View>
-                  </TouchableOpacity>
-                );
-              }
-
-              return (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleNavigation(item.route)}
-                  className="items-center justify-center py-1"
-                >
-                  <View className="items-center justify-center">
                     <Icon
                       size={26}
-                      color="#4710cb"
-                      fill={active ? "#4710cb" : "transparent"}
-                      strokeWidth={active ? 2.5 : 2}
+                      color="#001C71"
+                      strokeWidth={active ? 3 : 2}
                     />
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
+
+                    {/* Active underline */}
+                    <View
+                      className={`mt-1 h-[3px] rounded-full ${
+                        active ? "w-6 bg-[#001C71]" : "w-0"
+                      }`}
+                    />
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
         </View>
+
+        {/* ================= ACTIVITY SHEET ================= */}
+        {showActivitySheet && (
+          <View className="absolute inset-0 justify-end">
+            {/* Overlay */}
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => setShowActivitySheet(false)}
+              className="absolute inset-0 bg-black/40"
+            />
+
+            {/* Sheet */}
+            <View className="bg-[#ffffff] rounded-t-3xl px-6 py-5">
+              <View className="items-center mb-4">
+                <View className="w-10 h-1.5 bg-gray-600 rounded-full" />
+              </View>
+
+              <Text className="text-lg font-bold text-gray-900 mb-4">
+                Wallet Actions
+              </Text>
+
+              {/* RECEIVE */}
+              <TouchableOpacity
+                onPress={() => {
+                  setShowActivitySheet(false);
+                  router.push("/(protected)/bluetooth/server");
+                }}
+                className="border border-gray-200 rounded-2xl p-4 mb-3 flex-row items-center"
+              >
+                <View className="w-10 h-10 bg-blue-100 rounded-xl items-center justify-center">
+                  <QrCode size={20} color="#2563EB" />
+                </View>
+                <View className="ml-4">
+                  <Text className="font-semibold text-gray-900">
+                    Receive Tokens
+                  </Text>
+                  <Text className="text-gray-500 text-sm">Via Bluetooth</Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* SEND */}
+              <TouchableOpacity
+                onPress={() => {
+                  setShowActivitySheet(false);
+                  router.push("/(protected)/bluetooth/client");
+                }}
+                className="border border-gray-200 rounded-2xl p-4 flex-row items-center"
+              >
+                <View className="w-10 h-10 bg-green-100 rounded-xl items-center justify-center">
+                  <SmartphoneNfc size={20} color="#16A34A" />
+                </View>
+                <View className="ml-4">
+                  <Text className="font-semibold text-gray-900">
+                    Send Tokens
+                  </Text>
+                  <Text className="text-gray-500 text-sm">
+                    Transfer Money via Bluetooth
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {indexSheet && (
+          <View className="absolute inset-0 justify-end">
+            {/* Overlay */}
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => setindexActionSheet(false)}
+              className="absolute inset-0 bg-black/40"
+            />
+
+            {/* Sheet */}
+            <View className="bg-[#ffffff] rounded-t-3xl px-6 py-5">
+              <View className="items-center mb-4">
+                <View className="w-10 h-1.5 bg-gray-600 rounded-full" />
+              </View>
+
+              <Text className="text-lg font-bold text-gray-900 mb-4">
+                Wallet Actions
+              </Text>
+
+              {/* RECEIVE */}
+              <TouchableOpacity
+                onPress={() => {
+                  setShowActivitySheet(false);
+                  router.push("/(protected)/bluetooth/server");
+                }}
+                className="border border-gray-200 rounded-2xl p-4 mb-3 flex-row items-center"
+              >
+                <View className="w-10 h-10 bg-blue-100 rounded-xl items-center justify-center">
+                  <QrCode size={20} color="#2563EB" />
+                </View>
+                <View className="ml-4">
+                  <Text className="font-semibold text-gray-900">
+                    Receive Tokens
+                  </Text>
+                  <Text className="text-gray-500 text-sm">Via OrbitPay</Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* SEND */}
+              <TouchableOpacity
+                onPress={() => {
+                  setShowActivitySheet(false);
+                  router.push("/(protected)/bluetooth/client");
+                }}
+                className="border border-gray-200 rounded-2xl p-4 flex-row items-center"
+              >
+                <View className="w-10 h-10 bg-green-100 rounded-xl items-center justify-center">
+                  <SmartphoneNfc size={20} color="#16A34A" />
+                </View>
+                <View className="ml-4">
+                  <Text className="font-semibold text-gray-900">
+                    Send Tokens
+                  </Text>
+                  <Text className="text-gray-500 text-sm">
+                    Transfer Money via Bluetooth
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
-    </View>
+    </ImageBackground>
   );
 }

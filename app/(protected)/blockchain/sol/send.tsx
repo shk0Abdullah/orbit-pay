@@ -1,16 +1,17 @@
+import { balanceAtom, walletAtom } from "@/app/store/Atom";
+import { loadWallet, sendSol } from "@/lib/Solana/walletCreate"; // adjust path if needed
+import { PublicKey } from "@solana/web3.js";
+import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   SafeAreaView,
-  View,
   Text,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
-  Alert,
+  View,
 } from "react-native";
-import { PublicKey } from "@solana/web3.js";
-import { loadWallet, sendSol, getSolBalance } from "@/lib/Solana/walletCreate"; // adjust path if needed
-
 const COLORS = {
   blue: "#4710cb",
   green: "#c0f667",
@@ -22,21 +23,15 @@ const SendSol = () => {
   const [toAddress, setToAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
-  const [balance, setBalance] = useState<number | null>(null);
-  const [senderPub, setSenderPub] = useState<string | null>(null);
+
+  const [balance, _] = useAtom(balanceAtom);
+  const [wallet, setWallet] = useAtom(walletAtom);
 
   /* -------- Load wallet + balance -------- */
   useEffect(() => {
     (async () => {
-      const wallet = await loadWallet();
-      if (!wallet) {
-        Alert.alert("Wallet not found", "Create a wallet first.");
-        return;
-      }
-
-      setSenderPub(wallet.publicKey.toBase58());
-      const bal = await getSolBalance(wallet.publicKey.toBase58());
-      setBalance(bal);
+      console.log(wallet);
+      console.log(balance);
     })();
   }, []);
 

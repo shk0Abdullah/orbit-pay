@@ -21,16 +21,14 @@ export type Asset = {
   marketCap: string;
 };
 
-export const MyKey = "bc1q9f73p0x8s4u2wz6v3d7lqahny5jtrmkcepgf9s";
-
 export const defaultCoin: Activity = {
   id: 5,
-  icon: require("@/assets/images/logos/binance-coin-bnb-logo.png"),
-  title: "Binance Coin",
-  symbol: "BNB",
+  icon: require("@/assets/images/logos/solana-sol-logo.png"),
+  title: "Solana",
+  symbol: "SOL",
   marketCap: "$90B",
   percentageChange: 3.4,
-  amountBought: 4,
+  amountBought: 0,
   cost: 2400,
   type: "Buy",
   date: "2025-10-11",
@@ -81,7 +79,7 @@ export const activitiesData: Activity[] = [
     symbol: "SOL",
     marketCap: "$95B",
     percentageChange: 6.2,
-    amountBought: 10,
+    amountBought: 0,
     cost: 900,
     type: "Buy",
     date: "2025-09-25",

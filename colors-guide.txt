@@ -1,4 +1,5 @@
-Blue:  #4710cb
-Green:   #c0f667
-Smokey Black: #100C08
-Smokey White: #f5f5f5
+Deep Midnight	#001C71 Better-> #0B1E5B
+Royal Blue	#1A459D
+Azure Sky	#4A90E2
+Electric Cyan	#86D2FF
+Pure White	#FFFFFF

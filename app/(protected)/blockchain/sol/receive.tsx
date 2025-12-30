@@ -1,14 +1,15 @@
-import React from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import QRCode from "react-native-qrcode-svg";
+import { getSolBalance, loadWallet } from "@/lib/Solana/walletCreate"; // adjust path if needed
 import * as Clipboard from "expo-clipboard";
 import { Copy, Wallet } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import QRCode from "react-native-qrcode-svg";
 
 const COLORS = {
   blue: "#4710cb",
@@ -17,12 +18,25 @@ const COLORS = {
   white: "#f5f5f5",
 };
 
-// 🔹 Dummy address for now
-const DUMMY_SOL_ADDRESS = "7YkQ9FvFZ4WcX4Yp8gD7mP6s9uR2A9kB4ZxV8sEoFh2M";
-
 const ReceiveSol = () => {
+  const [balance, setBalance] = useState<number | null>(null);
+  const [receiver, setReceiver] = useState<string>("");
+
+  useEffect(() => {
+    (async () => {
+      const wallet = await loadWallet();
+      if (!wallet) {
+        Alert.alert("Wallet not found", "Create a wallet first.");
+        return;
+      }
+
+      setReceiver(wallet.publicKey.toBase58());
+      const bal = await getSolBalance(wallet.publicKey.toBase58());
+      setBalance(bal);
+    })();
+  }, []);
   const handleCopy = async () => {
-    await Clipboard.setStringAsync(DUMMY_SOL_ADDRESS);
+    await Clipboard.setStringAsync(receiver);
   };
 
   return (
@@ -58,6 +72,15 @@ const ReceiveSol = () => {
         >
           Share your address or scan QR
         </Text>
+        <Text
+          style={{
+            color: COLORS.white,
+            opacity: 0.8,
+            marginTop: 6,
+          }}
+        >
+          {balance}
+        </Text>
       </View>
 
       {/* QR Code */}
@@ -69,12 +92,18 @@ const ReceiveSol = () => {
           alignItems: "center",
         }}
       >
-        <QRCode
-          value={DUMMY_SOL_ADDRESS}
-          size={220}
-          backgroundColor="transparent"
-          color={COLORS.green}
-        />
+        {receiver ? (
+          <QRCode
+            value={receiver}
+            size={220}
+            backgroundColor="transparent"
+            color={COLORS.green}
+          />
+        ) : (
+          <Text style={{ color: COLORS.white, marginTop: 16 }}>
+            Loading QR...
+          </Text>
+        )}
 
         <Text
           style={{
@@ -109,7 +138,7 @@ const ReceiveSol = () => {
             }}
             numberOfLines={1}
           >
-            {DUMMY_SOL_ADDRESS}
+            {receiver}
           </Text>
 
           <TouchableOpacity onPress={handleCopy}>
