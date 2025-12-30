@@ -3,7 +3,6 @@ import {
   AlertCircle,
   Bluetooth,
   CheckCircle,
-  Radio,
   Search,
   Wifi,
 } from "lucide-react-native";
@@ -153,15 +152,12 @@ export default function BluetoothClient() {
   });
 
   return (
-    <View className="flex-1 bg-[#100C08]">
+    <View className="flex-1 ">
       {/* Header Section */}
       <View className="px-6 pt-6 pb-4">
         <View className="flex-row items-center mb-4">
-          <View className="w-10 h-10 rounded-full bg-[#4710cb] items-center justify-center mr-3">
-            <Radio size={20} color="#c0f667" />
-          </View>
           <View>
-            <Text className="text-[#f5f5f5] text-2xl font-bold">
+            <Text className="text-[#ffffff] text-2xl font-bold">
               Find Devices
             </Text>
             <Text className="text-[#f5f5f5]/60 text-sm">
@@ -175,7 +171,7 @@ export default function BluetoothClient() {
           onPress={scanAllDevices}
           disabled={loading}
           className={`rounded-2xl p-4 flex-row items-center justify-center ${
-            loading ? "bg-[#4710cb]/50" : "bg-[#4710cb]"
+            loading ? "bg-[#001C71]/50" : "bg-[#001C71]"
           }`}
         >
           {loading ? (
@@ -186,7 +182,7 @@ export default function BluetoothClient() {
                 }}
                 className="mr-3"
               >
-                <Search size={20} color="#c0f667" />
+                <Search size={20} color="#86D2FF" />
               </Animated.View>
               <Text className="text-[#f5f5f5] text-base font-bold">
                 Scanning...
@@ -194,7 +190,7 @@ export default function BluetoothClient() {
             </>
           ) : (
             <>
-              <Search size={20} color="#c0f667" className="mr-3" />
+              <Search size={20} color="#86D2FF" className="mr-3" />
               <Text className="text-[#f5f5f5] text-base font-bold ml-2">
                 Scan for Devices
               </Text>
@@ -208,7 +204,7 @@ export default function BluetoothClient() {
         {devices.length === 0 && !loading ? (
           <View className="flex-1 items-center justify-center">
             <View className="w-20 h-20 rounded-full bg-[#4710cb]/20 items-center justify-center mb-4">
-              <Bluetooth size={32} color="#4710cb" />
+              <Bluetooth size={32} color="#86D2FF" />
             </View>
             <Text className="text-[#f5f5f5] text-lg font-semibold mb-2">
               No Devices Found
@@ -234,11 +230,11 @@ export default function BluetoothClient() {
                   <View className="flex-row items-center flex-1">
                     <View
                       className={`w-12 h-12 rounded-full items-center justify-center mr-3 ${
-                        item.bonded ? "bg-[#c0f667]/20" : "bg-[#4710cb]/20"
+                        item.bonded ? "bg-[#86D2FF]/20" : "bg-[#4710cb]/20"
                       }`}
                     >
                       {item.bonded ? (
-                        <CheckCircle size={24} color="#c0f667" />
+                        <CheckCircle size={24} color="#86D2FF" />
                       ) : (
                         <Wifi size={24} color="#4710cb" />
                       )}
@@ -251,9 +247,9 @@ export default function BluetoothClient() {
                         {item.address}
                       </Text>
                       {!item.bonded && (
-                        <View className="flex-row items-center mt-2">
+                        <View className="flex-row items-center m-2 p-5">
                           <AlertCircle size={12} color="#c0f667" />
-                          <Text className="text-[#c0f667] text-xs ml-1 font-semibold">
+                          <Text className="text-[#c0f667] text-xs  font-semibold">
                             Tap to Pair
                           </Text>
                         </View>
@@ -261,7 +257,7 @@ export default function BluetoothClient() {
                     </View>
                   </View>
                   <View
-                    className={`px-3 py-1.5 rounded-full ${
+                    className={`p-4 rounded-lg ${
                       item.bonded ? "bg-[#c0f667]/20" : "bg-[#4710cb]/20"
                     }`}
                   >
@@ -283,19 +279,26 @@ export default function BluetoothClient() {
       {/* Connected Device Indicator */}
       {connectedDevice && (
         <View className="px-6 pb-6">
-          <View className="bg-[#c0f667]/10 border border-[#c0f667]/30 rounded-2xl p-4 flex-row items-center">
-            <View className="w-10 h-10 rounded-full bg-[#c0f667] items-center justify-center mr-3">
-              <CheckCircle size={20} color="#100C08" />
+          <View className="flex-row items-center">
+            {/* Status Indicator */}
+            <View className="w-10 h-10 rounded-full border-2 border-[#86D2FF] items-center justify-center mr-4">
+              <CheckCircle size={18} color="#86D2FF" />
             </View>
+
+            {/* Text */}
             <View className="flex-1">
-              <Text className="text-[#f5f5f5] text-sm font-semibold mb-1">
-                Connected to
+              <Text className="text-[#86D2FF] text-xs font-semibold tracking-wide mb-0.5">
+                CONNECTED DEVICE
               </Text>
-              <Text className="text-[#c0f667] text-base font-bold">
+
+              <Text className="text-[#FFFFFF] text-base font-bold">
                 {connectedDevice.name || "Unknown Device"}
               </Text>
             </View>
           </View>
+
+          {/* Subtle Divider */}
+          <View className="mt-4 h-px bg-[#1A459D]/40" />
         </View>
       )}
     </View>

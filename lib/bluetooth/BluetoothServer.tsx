@@ -127,8 +127,6 @@ export default function BluetoothServer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ================= UI (UNCHANGED) ================= */
-
   const spinValue1 = useRef(new Animated.Value(0)).current;
   const spinValue2 = useRef(new Animated.Value(0)).current;
   const pulseValue = useRef(new Animated.Value(1)).current;
@@ -181,27 +179,29 @@ export default function BluetoothServer() {
   });
 
   return (
-    <View className="flex-1 justify-center bg-[#100C08]">
+    <View className="flex-1 justify-center mt-40 ">
       {!connection && (
-        <View className="items-center">
+        <View className="items-center ">
           <Animated.View
             style={{ transform: [{ rotate: spin1 }, { scale: pulseValue }] }}
           >
-            <Radio size={48} color="#c0f667" />
+            <Radio size={48} color="#4A90E2" />
           </Animated.View>
-          <Text className="text-white mt-6 text-lg">Waiting for payment…</Text>
+          <Text className="text-white font-bold pt-10 text-lg">
+            Waiting for Connection....
+          </Text>
         </View>
       )}
 
       {connection && (
         <View className="px-6">
-          <Text className="text-[#c0f667] text-xl font-bold mb-4">
+          <Text className="text-[#4A90E2] text-xl font-bold mb-4">
             Connected: {connection.name ?? "Unknown"}
           </Text>
 
           {receivedPayment && (
             <View className="bg-white p-6 rounded-2xl">
-              <Text className="text-4xl font-black text-[#4710cb]">
+              <Text className="text-4xl font-black text-[#4A90E2]">
                 PKR {receivedPayment.amount}
               </Text>
             </View>

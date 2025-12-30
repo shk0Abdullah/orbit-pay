@@ -1,4 +1,9 @@
-import { balanceAtom, indexActionSheet, walletAtom } from "@/app/store/Atom";
+import {
+  balanceAtom,
+  indexActionSheet,
+  intentAtom,
+  walletAtom,
+} from "@/app/store/Atom";
 import { api } from "@/convex/_generated/api";
 import { getSolBalance, loadWallet } from "@/lib/Solana/walletCreate";
 import { useAuth } from "@clerk/clerk-expo";
@@ -16,6 +21,8 @@ import {
 } from "react-native";
 
 export default function Home() {
+  const [, setIntent] = useAtom(intentAtom);
+
   const { userId } = useAuth();
   const [solBalance, setSolBalance] = useAtom(balanceAtom);
   const [, setWalletAddress] = useAtom(walletAtom);
@@ -61,13 +68,19 @@ export default function Home() {
             <Widget
               icon="download"
               label="Receive"
-              onPress={() => setindexActionSheet(true)}
+              onPress={() => {
+                setindexActionSheet(true);
+                setIntent("receive");
+              }}
             />
             <Widget
               icon="send"
               label="Send"
               disabled={solBalance <= 0}
-              onPress={() => setindexActionSheet(true)}
+              onPress={() => {
+                setindexActionSheet(true);
+                setIntent("send");
+              }}
             />
             <Widget icon="repeat" label="Swap" />
           </View>

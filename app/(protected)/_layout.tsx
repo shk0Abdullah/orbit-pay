@@ -30,17 +30,17 @@ import { useEffect, useState } from "react";
 
 import { useAtom } from "jotai";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
-import { indexActionSheet } from "../store/Atom";
+import { indexActionSheet, intentAtom } from "../store/Atom";
 
 export default function RootLayout() {
   const segments = useSegments();
+  const [intent] = useAtom(intentAtom);
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const [indexSheet, setindexActionSheet] = useAtom(indexActionSheet);
   const [bleEnabled, setBleEnabled] = useState<boolean | null>(null);
   const [showActivitySheet, setShowActivitySheet] = useState(false);
 
-  /* ---------------- Bluetooth ---------------- */
   const enableBluetooth = async () => {
     try {
       const enabled = await RNBluetoothClassic.isBluetoothEnabled();
@@ -230,7 +230,7 @@ export default function RootLayout() {
               <TouchableOpacity
                 onPress={() => {
                   setShowActivitySheet(false);
-                  router.push("/(protected)/bluetooth/server");
+                  router.push("/(protected)/bluetooth/receive");
                 }}
                 className="border border-gray-200 rounded-2xl p-4 mb-3 flex-row items-center"
               >
@@ -249,7 +249,7 @@ export default function RootLayout() {
               <TouchableOpacity
                 onPress={() => {
                   setShowActivitySheet(false);
-                  router.push("/(protected)/bluetooth/client");
+                  router.push("/(protected)/bluetooth/send");
                 }}
                 className="border border-gray-200 rounded-2xl p-4 flex-row items-center"
               >
@@ -280,50 +280,68 @@ export default function RootLayout() {
 
             {/* Sheet */}
             <View className="bg-[#ffffff] rounded-t-3xl px-6 py-5">
+              {/* Handle */}
               <View className="items-center mb-4">
                 <View className="w-10 h-1.5 bg-gray-600 rounded-full" />
               </View>
 
               <Text className="text-lg font-bold text-gray-900 mb-4">
-                Wallet Actions
+                Choose Transfer Method
               </Text>
 
-              {/* RECEIVE */}
+              {/* ================= ORBITPAY ================= */}
               <TouchableOpacity
                 onPress={() => {
-                  setShowActivitySheet(false);
-                  router.push("/(protected)/bluetooth/server");
+                  // setRail("bluetooth");
+                  setindexActionSheet(false);
+                  router.push(
+                    `/(protected)/bluetooth/${intent}` as RelativePathString
+                  );
                 }}
                 className="border border-gray-200 rounded-2xl p-4 mb-3 flex-row items-center"
               >
-                <View className="w-10 h-10 bg-blue-100 rounded-xl items-center justify-center">
-                  <QrCode size={20} color="#2563EB" />
+                <View className="w-10 h-10 rounded-xl items-center justify-center">
+                  <Image
+                    source={require("@/assets/images/withoutbg.png")}
+                    className="w-8 h-8"
+                    resizeMode="contain"
+                  />
                 </View>
+
                 <View className="ml-4">
                   <Text className="font-semibold text-gray-900">
-                    Receive Tokens
+                    Via OrbitPay
                   </Text>
-                  <Text className="text-gray-500 text-sm">Via OrbitPay</Text>
+                  <Text className="text-gray-500 text-sm">
+                    Instant transfer using Bluetooth
+                  </Text>
                 </View>
               </TouchableOpacity>
 
-              {/* SEND */}
+              {/* ================= SOLANA ================= */}
               <TouchableOpacity
                 onPress={() => {
-                  setShowActivitySheet(false);
-                  router.push("/(protected)/bluetooth/client");
+                  setindexActionSheet(false);
+                  router.push(
+                    `/(protected)/blockchain/sol/${intent}` as RelativePathString
+                  );
                 }}
                 className="border border-gray-200 rounded-2xl p-4 flex-row items-center"
               >
-                <View className="w-10 h-10 bg-green-100 rounded-xl items-center justify-center">
-                  <SmartphoneNfc size={20} color="#16A34A" />
+                <View className="w-10 h-10 rounded-xl items-center justify-center">
+                  <Image
+                    source={require("@/assets/images/logos/solana-sol-logo.png")}
+                    className="w-8 h-8"
+                    resizeMode="contain"
+                  />
                 </View>
+
                 <View className="ml-4">
                   <Text className="font-semibold text-gray-900">
-                    Send Tokens
+                    Via Solana
                   </Text>
                   <Text className="text-gray-500 text-sm">
-                    Transfer Money via Bluetooth
+                    On-chain blockchain transfer
                   </Text>
                 </View>
               </TouchableOpacity>
