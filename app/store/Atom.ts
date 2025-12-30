@@ -6,7 +6,7 @@ import type { Keypair } from "@solana/web3.js";
 export const walletAtom = atom<Keypair | string>("");
 
 export const balanceAtom = atom<number>(0);
-
+export const indexActionSheet = atom<boolean>(false);
 export const signupAtom = atom({
   email: "",
   password: "",
