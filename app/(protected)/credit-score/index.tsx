@@ -54,106 +54,108 @@ export default function CreditScorePage() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.black }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
       <ScrollView contentContainerStyle={{ padding: Spacing * 2 }}>
-        <Text style={{ color: Colors.text, fontSize: 24, marginBottom: Spacing }}>
+        <Text style={{ color: Colors.portfolio.textPrimary, fontSize: 24, marginBottom: Spacing }}>
           Credit Score Prediction
         </Text>
 
-        <View style={{ marginBottom: Spacing }}>
-          <Text style={{ color: Colors.text }}>Age</Text>
-          <TextInput
-            keyboardType="numeric"
-            value={String(age)}
-            onChangeText={(v) => setAge(Number(v) || 0)}
-            style={{ backgroundColor: "#111", color: "#fff", padding: 12, borderRadius: 8, marginTop: 8 }}
-          />
-        </View>
+        <View style={{ backgroundColor: 'rgba(29,24,86,0.72)', borderRadius: 16, padding: Spacing * 1.5, marginBottom: Spacing }}>
+          <View style={{ marginBottom: Spacing }}>
+            <Text style={{ color: Colors.portfolio.textSecondary }}>Age</Text>
+            <TextInput
+              keyboardType="numeric"
+              value={String(age)}
+              onChangeText={(v) => setAge(Number(v) || 0)}
+              style={{ backgroundColor: 'rgba(29,24,86,0.20)', color: Colors.portfolio.textPrimary, padding: 12, borderRadius: 8, marginTop: 8 }}
+            />
+          </View> 
 
         <View style={{ marginBottom: Spacing }}>
-          <Text style={{ color: Colors.text }}>Monthly Inhand Salary</Text>
+          <Text style={{ color: Colors.portfolio.textSecondary }}>Monthly Inhand Salary</Text>
           <TextInput
             keyboardType="numeric"
             value={String(monthly_inhand_salary)}
             onChangeText={(v) => setSalary(Number(v) || 0)}
-            style={{ backgroundColor: "#111", color: "#fff", padding: 12, borderRadius: 8, marginTop: 8 }}
+            style={{ backgroundColor: 'rgba(29,24,86,0.20)', color: Colors.portfolio.textPrimary, padding: 12, borderRadius: 8, marginTop: 8 }}
           />
         </View>
 
         <View style={{ marginBottom: Spacing }}>
-          <Text style={{ color: Colors.text }}>Number of Credit Cards</Text>
+          <Text style={{ color: Colors.portfolio.textSecondary }}>Number of Credit Cards</Text>
           <TextInput
             keyboardType="numeric"
             value={String(num_credit_card)}
             onChangeText={(v) => setNumCards(Number(v) || 0)}
-            style={{ backgroundColor: "#111", color: "#fff", padding: 12, borderRadius: 8, marginTop: 8 }}
+            style={{ backgroundColor: 'rgba(29,24,86,0.20)', color: Colors.portfolio.textPrimary, padding: 12, borderRadius: 8, marginTop: 8 }}
           />
         </View>
 
         <View style={{ marginBottom: Spacing }}>
-          <Text style={{ color: Colors.text }}>Outstanding Debt</Text>
+          <Text style={{ color: Colors.portfolio.textSecondary }}>Outstanding Debt</Text>
           <TextInput
             keyboardType="numeric"
             value={String(outstanding_debt)}
             onChangeText={(v) => setOutstandingDebt(Number(v) || 0)}
-            style={{ backgroundColor: "#111", color: "#fff", padding: 12, borderRadius: 8, marginTop: 8 }}
+            style={{ backgroundColor: 'rgba(29,24,86,0.20)', color: Colors.portfolio.textPrimary, padding: 12, borderRadius: 8, marginTop: 8 }}
           />
         </View>
 
         <View style={{ marginBottom: Spacing }}>
-          <Text style={{ color: Colors.text }}>Credit Utilization Ratio (%)</Text>
+          <Text style={{ color: Colors.portfolio.textSecondary }}>Credit Utilization Ratio (%)</Text>
           <TextInput
             keyboardType="numeric"
             value={String(credit_utilization_ratio)}
             onChangeText={(v) => setCreditUtil(Number(v) || 0)}
-            style={{ backgroundColor: "#111", color: "#fff", padding: 12, borderRadius: 8, marginTop: 8 }}
+            style={{ backgroundColor: 'rgba(29,24,86,0.20)', color: Colors.portfolio.textPrimary, padding: 12, borderRadius: 8, marginTop: 8 }}
           />
         </View>
 
         <View style={{ marginBottom: Spacing }}>
-          <Text style={{ color: Colors.text }}>Monthly Balance</Text>
+          <Text style={{ color: Colors.portfolio.textSecondary }}>Monthly Balance</Text>
           <TextInput
             keyboardType="numeric"
             value={String(monthly_balance)}
             onChangeText={(v) => setMonthlyBalance(Number(v) || 0)}
-            style={{ backgroundColor: "#111", color: "#fff", padding: 12, borderRadius: 8, marginTop: 8 }}
+            style={{ backgroundColor: 'rgba(29,24,86,0.20)', color: Colors.portfolio.textPrimary, padding: 12, borderRadius: 8, marginTop: 8 }}
           />
         </View>
 
         <View style={{ marginBottom: Spacing }}>
-          <Text style={{ color: Colors.text }}>Credit Mix (Standard / Good / Bad)</Text>
+          <Text style={{ color: Colors.portfolio.textSecondary }}>Credit Mix (Standard / Good / Bad)</Text>
           <TextInput
             value={credit_mix}
             onChangeText={setCreditMix}
-            style={{ backgroundColor: "#111", color: "#fff", padding: 12, borderRadius: 8, marginTop: 8 }}
+            style={{ backgroundColor: 'rgba(29,24,86,0.20)', color: Colors.portfolio.textPrimary, padding: 12, borderRadius: 8, marginTop: 8 }}
           />
         </View>
 
         <View style={{ marginBottom: Spacing }}>
-          <Text style={{ color: Colors.text }}>Customer ID (optional)</Text>
+          <Text style={{ color: Colors.portfolio.textSecondary }}>Customer ID (optional)</Text>
           <TextInput
             value={customer_id}
             onChangeText={setCustomerId}
-            style={{ backgroundColor: "#111", color: "#fff", padding: 12, borderRadius: 8, marginTop: 8 }}
+            style={{ backgroundColor: 'rgba(29,24,86,0.20)', color: Colors.portfolio.textPrimary, padding: 12, borderRadius: 8, marginTop: 8 }}
           />
         </View>
 
         <TouchableOpacity
           onPress={submit}
           disabled={loading}
-          style={{ backgroundColor: Colors.primary, padding: 16, borderRadius: 12, alignItems: "center", marginBottom: Spacing }}
+          style={{ backgroundColor: Colors.portfolio.accent, padding: 16, borderRadius: 12, alignItems: "center", marginBottom: Spacing }}
         >
-          <Text style={{ color: Colors.onPrimary }}>{loading ? "Predicting..." : "Predict"}</Text>
+          <Text style={{ color: Colors.portfolio.textPrimary }}>{loading ? "Predicting..." : "Predict"}</Text>
         </TouchableOpacity>
 
         {result && (
-          <View style={{ backgroundColor: "#111", padding: 16, borderRadius: 12 }}>
-            <Text style={{ color: Colors.text, fontWeight: "bold" }}>Result</Text>
-            <Text style={{ color: Colors.text }}>Score: {result.predicted_score}</Text>
-            <Text style={{ color: Colors.text }}>Confidence: {result.confidence}</Text>
-            <Text style={{ color: Colors.text, marginTop: 8 }}>Model version: {result.model_version}</Text>
+          <View style={{ backgroundColor: Colors.portfolio.card, padding: 16, borderRadius: 12 }}>
+            <Text style={{ color: Colors.portfolio.textPrimary, fontWeight: "bold" }}>Result</Text>
+            <Text style={{ color: Colors.portfolio.textPrimary }}>Score: {result.predicted_score}</Text>
+            <Text style={{ color: Colors.portfolio.textSecondary }}>Confidence: {result.confidence}</Text>
+            <Text style={{ color: Colors.portfolio.textSecondary, marginTop: 8 }}>Model version: {result.model_version}</Text>
           </View>
         )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
