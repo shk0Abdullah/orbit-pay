@@ -37,16 +37,15 @@ export default function Home() {
   const total = Number(dbUser?.balance || 0) + solBalance;
 
   return (
-    <SafeAreaView className="flex-1 p-4 justify-center">
-      {/* ================= PORTFOLIO CARD ================= */}
-      <View className="bg-[#001C71]/90 rounded-3xl p-6 items-center">
+    <SafeAreaView className="flex-1 p-1 justify-center">
+      <View className="bg-[#030d29] rounded-3xl p-6 pt-10 mt-10 items-center">
         <Text className="text-white/80 font-semibold">Total portfolio</Text>
 
         <Text className="text-white text-4xl font-extrabold my-2">
           ${total.toFixed(2)}
         </Text>
 
-        <Text className="text-white font-bold">+ $12.61</Text>
+        <Text className="text-green-300 font-bold">+ $12.61</Text>
 
         {/* Balances */}
         <View className="flex-row justify-between w-full mt-6">
@@ -63,8 +62,7 @@ export default function Home() {
         </View>
       </View>
 
-      {/* ================= SOL CARD ================= */}
-      <View className="bg-[#0B1E5B]/90 rounded-3xl p-5 mt-6 flex-row items-center">
+      <View className="bg-[#020a20] rounded-3xl p-5 mt-6 flex-row items-center">
         <Image
           source={require("@/assets/images/logos/solana-sol-logo.png")}
           className="w-10 h-10 mr-4"
@@ -73,7 +71,9 @@ export default function Home() {
 
         <View className="flex-1">
           <Text className="text-white font-bold">Solana</Text>
-          <Text className="text-blue-300 font-semibold mt-1">$4.75 +3.54%</Text>
+          <Text className="text-green-300 font-semibold mt-1">
+            $4.75 +3.54%
+          </Text>
         </View>
 
         <Text className="text-white font-bold text-lg">
@@ -84,11 +84,9 @@ export default function Home() {
   );
 }
 
-/* ================= COMPONENTS ================= */
-
 const BalanceBox = ({ label, value }: any) => (
-  <View className="w-[48%] bg-[#1A459D] p-4 rounded-3xl items-center">
-    <Text className="text-sky-300 font-semibold opacity-80">{label}</Text>
+  <View className="w-[48%] bg-[#0B1E5B] p-4 rounded-3xl items-center">
+    <Text className="text-white font-bold opacity-80">{label}</Text>
     <Text className="text-white text-lg font-bold mt-1">{value}</Text>
     <Text className="text-green-400 font-bold mt-1">+ $12.61</Text>
   </View>
@@ -97,11 +95,10 @@ const BalanceBox = ({ label, value }: any) => (
 const Widget = ({ icon, label, disabled }: any) => (
   <TouchableOpacity
     disabled={disabled}
-    className={`w-16 h-16 rounded-2xl items-center justify-center ${
-      disabled ? "bg-[#163B7A]/60" : "bg-[#0B1E5B]"
+    className={`w-20 h-20 rounded-2xl items-center justify-center ${
+      disabled ? "bg-[#46484c]" : "bg-[#0B1E5B]"
     }`}
   >
-    {/* Bigger + bolder visual weight */}
     <Ionicons name={icon} size={26} color="white" />
     <Text className="text-white text-xs font-extrabold mt-1">{label}</Text>
   </TouchableOpacity>
