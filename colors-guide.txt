@@ -1,4 +1,4 @@
-Deep Midnight	#001C71
+Deep Midnight	#001C71 Better-> #0B1E5B
 Royal Blue	#1A459D
 Azure Sky	#4A90E2
 Electric Cyan	#86D2FF

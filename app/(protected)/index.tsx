@@ -1,274 +1,105 @@
-import CoinInfo from "@/app/components/HomeUI/CoinInfo";
-import Colors from "@/app/constants/Colors";
-import Font from "@/app/constants/Fonts";
-import FontSize from "@/app/constants/FontSize";
-import { Spacing } from "@/app/constants/Spacing";
-import { activitiesData, defaultCoin } from "@/app/data";
 import { balanceAtom, walletAtom } from "@/app/store/Atom";
 import { api } from "@/convex/_generated/api";
-import { getSolBalance, loadWallet } from "@/lib/Solana/walletCreate"; // adjust path if needed
+import { getSolBalance, loadWallet } from "@/lib/Solana/walletCreate";
 import { useAuth } from "@clerk/clerk-expo";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
-import * as Clipboard from "expo-clipboard";
-import { router } from "expo-router";
 import { useAtom } from "jotai";
 import React, { useEffect } from "react";
 import {
-  Alert,
+  Image,
   SafeAreaView,
-  ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 
-const Home = () => {
+export default function Home() {
   const { userId } = useAuth();
-  const [balance, setBalance] = useAtom(balanceAtom);
-  const [wlt, setWalletAddress] = useAtom(walletAtom);
+  const [solBalance, setSolBalance] = useAtom(balanceAtom);
+  const [, setWalletAddress] = useAtom(walletAtom);
 
   const dbUser = useQuery(
     api.users.getUserByClerkId,
     userId ? { clerkId: userId } : "skip"
   );
-  const copyToClipboard = async (text: string) => {
-    await Clipboard.setStringAsync(text);
-  };
+
   useEffect(() => {
     (async () => {
       const wallet = await loadWallet();
-      console.log(wallet);
-      console.log(wallet?.publicKey.toBase58());
-      console.log(balance);
-
-      if (!wallet) {
-        Alert.alert("Wallet not found", "Create a wallet first.");
-        return;
-      }
-
-      setWalletAddress(wallet.publicKey.toBase58());
-      const bal = await getSolBalance(wallet.publicKey.toBase58());
-      setBalance(bal);
+      if (!wallet) return;
+      const address = wallet.publicKey.toBase58();
+      setWalletAddress(address);
+      setSolBalance(await getSolBalance(address));
     })();
   }, []);
+
+  const total = Number(dbUser?.balance || 0) + solBalance;
+
   return (
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <SafeAreaView>
-        <View style={{ paddingHorizontal: Spacing * 2 }}>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <Ionicons name="search" size={24} color={Colors.text} />
-            <TouchableOpacity
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: Colors.text,
-                  fontSize: FontSize.medium,
-                  fontFamily: Font["poppins-semiBold"],
-                  marginRight: Spacing / 2,
-                }}
-              >
-                Wallet1
-              </Text>
-              <Ionicons name="chevron-down" size={24} color={Colors.text} />
-            </TouchableOpacity>
-            <Ionicons name="scan" size={24} color={Colors.text} />
-          </View>
+    <SafeAreaView className="flex-1 p-1 justify-center">
+      <View className="bg-[#030d29] rounded-3xl p-6 pt-10 mt-10 items-center">
+        <Text className="text-white/80 font-semibold">Total portfolio</Text>
 
-          <View style={{ marginVertical: Spacing * 3 }}>
-            <View
-              style={{
-                marginTop: Spacing * 3,
-                flexDirection: "row",
-                backgroundColor: Colors.lightBackground,
-                paddingVertical: Spacing / 2,
-                borderRadius: Spacing * 4,
-                width: Spacing * 15,
-                alignItems: "center",
-                justifyContent: "center",
-                alignSelf: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: Colors.text,
-                  fontSize: FontSize.small,
-                  fontFamily: Font["poppins-regular"],
-                  width: Spacing * 10,
-                }}
-                numberOfLines={1}
-              >
-                {/* {wlt} */}
-              </Text>
+        <Text className="text-white text-4xl font-extrabold my-2">
+          ${total.toFixed(2)}
+        </Text>
 
-              <TouchableOpacity
-                onPress={() => copyToClipboard("sand")}
-                style={{ marginLeft: 8 }}
-              >
-                <Ionicons
-                  name="copy-outline"
-                  size={16}
-                  color={Colors.primary}
-                />
-              </TouchableOpacity>
-            </View>
+        <Text className="text-green-300 font-bold">+ $12.61</Text>
 
-            <View style={{ flexDirection: "row", alignSelf: "center" }}>
-              <Text
-                style={{
-                  color: Colors.text,
-                  fontSize: FontSize.xxLarge * 2,
-                  fontFamily: Font["poppins-regular"],
-                }}
-              >
-                $ {dbUser?.balance}
-              </Text>
-              <TextInput
-                style={{
-                  color: Colors.text,
-                  fontSize: FontSize.xxLarge * 2,
-                  fontFamily: Font["poppins-regular"],
-                }}
-              />
-            </View>
-
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginVertical: Spacing * 2,
-              }}
-            >
-              {/* Send Button */}
-              <TouchableOpacity
-                onPress={() =>
-                  router.push({
-                    pathname: "/(protected)/Distinguisher/selector",
-                    params: { type: "send" },
-                  })
-                }
-                style={{
-                  backgroundColor: Colors.primary,
-                  paddingHorizontal: Spacing * 3,
-                  paddingVertical: Spacing * 2,
-                  borderRadius: Spacing * 10,
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "45%",
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: FontSize.large,
-                    color: Colors.onPrimary,
-                    marginRight: Spacing,
-                  }}
-                >
-                  Send
-                </Text>
-                <MaterialIcons
-                  name="arrow-outward"
-                  size={24}
-                  color={Colors.onPrimary}
-                />
-              </TouchableOpacity>
-
-              {/* Receive Button */}
-              <TouchableOpacity
-                onPress={() =>
-                  router.push({
-                    pathname: "/(protected)/Distinguisher/selector",
-                    params: { type: "receive" },
-                  })
-                }
-                style={{
-                  backgroundColor: Colors.secondary,
-                  paddingHorizontal: Spacing * 3,
-                  paddingVertical: Spacing * 2,
-                  borderRadius: Spacing * 10,
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "45%",
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: FontSize.large,
-                    color: Colors.onSecondary,
-                    marginRight: Spacing,
-                  }}
-                >
-                  Receive
-                </Text>
-                <MaterialIcons
-                  name="arrow-outward"
-                  size={24}
-                  color={Colors.onSecondary}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
+        {/* Balances */}
+        <View className="flex-row justify-between w-full mt-6">
+          <BalanceBox label="Coins" value={`$${solBalance}`} />
+          <BalanceBox label="Cash" value={`$${dbUser?.balance || 0}`} />
         </View>
 
-        <View
-          style={{
-            backgroundColor: Colors.lightBackground,
-            paddingHorizontal: Spacing * 2,
-            paddingTop: Spacing * 3,
-            paddingBottom: Spacing * 6,
-            borderTopRightRadius: Spacing * 3,
-            borderTopLeftRadius: Spacing * 3,
-          }}
-        >
-          <CoinInfo info={defaultCoin} />
+        {/* Widgets */}
+        <View className="flex-row justify-between w-full mt-6">
+          <Widget icon="swap-horizontal" label="Buy/Sell" />
+          <Widget icon="download" label="Receive" />
+          <Widget icon="send" label="Send" disabled={solBalance <= 0} />
+          <Widget icon="repeat" label="Swap" />
         </View>
+      </View>
 
-        <View
-          style={{
-            paddingHorizontal: Spacing * 2,
-            paddingVertical: Spacing * 3,
-            backgroundColor: Colors.white,
-            marginTop: -Spacing * 4,
-            borderTopRightRadius: Spacing * 3,
-            borderTopLeftRadius: Spacing * 3,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.blackText,
-              fontFamily: Font["poppins-semiBold"],
-              fontSize: FontSize.large,
-              marginBottom: Spacing * 2,
-            }}
-          >
-            Activity
+      <View className="bg-[#020a20] rounded-3xl p-5 mt-6 flex-row items-center">
+        <Image
+          source={require("@/assets/images/logos/solana-sol-logo.png")}
+          className="w-10 h-10 mr-4"
+          resizeMode="contain"
+        />
+
+        <View className="flex-1">
+          <Text className="text-white font-bold">Solana</Text>
+          <Text className="text-green-300 font-semibold mt-1">
+            $4.75 +3.54%
           </Text>
-          {activitiesData.map((activity) => (
-            <View
-              style={{
-                borderTopWidth: 0.2,
-                borderColor: Colors.lightText,
-                paddingVertical: Spacing,
-              }}
-              key={activity.id}
-            >
-              <CoinInfo theme="light" info={activity} />
-            </View>
-          ))}
         </View>
-      </SafeAreaView>
-    </ScrollView>
-  );
-};
 
-export default Home;
+        <Text className="text-white font-bold text-lg">
+          ${solBalance.toFixed(2)}
+        </Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const BalanceBox = ({ label, value }: any) => (
+  <View className="w-[48%] bg-[#0B1E5B] p-4 rounded-3xl items-center">
+    <Text className="text-white font-bold opacity-80">{label}</Text>
+    <Text className="text-white text-lg font-bold mt-1">{value}</Text>
+    <Text className="text-green-400 font-bold mt-1">+ $12.61</Text>
+  </View>
+);
+
+const Widget = ({ icon, label, disabled }: any) => (
+  <TouchableOpacity
+    disabled={disabled}
+    className={`w-20 h-20 rounded-2xl items-center justify-center ${
+      disabled ? "bg-[#46484c]" : "bg-[#0B1E5B]"
+    }`}
+  >
+    <Ionicons name={icon} size={26} color="white" />
+    <Text className="text-white text-xs font-extrabold mt-1">{label}</Text>
+  </TouchableOpacity>
+);
