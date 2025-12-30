@@ -84,10 +84,10 @@ export default function RootLayout() {
       isCenter: true,
     },
     {
-      name: "Wallet",
+      name: "Credit",
       icon: CreditCard,
-      route: "/(wallet)",
-      segments: ["(wallet)"],
+      route: "/(protected)/credit-score",
+      segments: ["(protected)", "credit-score"],
     },
     {
       name: "Profile",
