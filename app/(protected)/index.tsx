@@ -70,29 +70,6 @@ export default function Home() {
               onPress={() => setindexActionSheet(true)}
             />
             <Widget icon="repeat" label="Swap" />
-
-            {/* Credit Score Button */}
-            <View style={{ marginTop: Spacing * 2, alignItems: "center" }}>
-              <TouchableOpacity
-                onPress={() => router.push({ pathname: "/(protected)/credit-score" })}
-                style={{
-                  backgroundColor: Colors.primary,
-                  paddingHorizontal: Spacing * 4,
-                  paddingVertical: Spacing * 2,
-                  borderRadius: Spacing * 8,
-                }}
-              >
-                <Text
-                  style={{
-                    color: Colors.onPrimary,
-                    fontSize: FontSize.large,
-                    fontFamily: Font["poppins-semiBold"],
-                  }}
-                >
-                  Credit Score
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
 
