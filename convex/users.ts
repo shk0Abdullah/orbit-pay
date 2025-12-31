@@ -1,5 +1,5 @@
-import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
 async function hashCNIC(cnic: string): Promise<string> {
   const data = new TextEncoder().encode(cnic);

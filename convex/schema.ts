@@ -1,4 +1,3 @@
-
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
@@ -15,8 +14,6 @@ export default defineSchema({
     .index("by_cnic", ["cnic"])
     .index("by_clerkId", ["clerkId"]),
 
-
-    
   payments: defineTable({
     senderUserId: v.id("users"),
     receiverUserId: v.id("users"),
@@ -51,6 +48,18 @@ export default defineSchema({
     createdAt: v.float64(),
   })
     .index("by_clerkId", ["clerkId"])
-    .index("by_customer_id", ["customer_id"]) 
+    .index("by_customer_id", ["customer_id"])
     .index("by_prediction_id", ["prediction_id"]),
+
+  wallets: defineTable({
+    userId: v.id("users"),
+
+    publicKey: v.string(),
+    curve: v.literal("ed25519"),
+
+    // Metadata
+    createdAt: v.float64(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_public_key", ["publicKey"]),
 });
