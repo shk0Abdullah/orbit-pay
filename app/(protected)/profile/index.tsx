@@ -1,4 +1,5 @@
 import { walletAtom } from "@/app/store/Atom";
+import { showToast } from "@/lib/toast";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
@@ -30,7 +31,8 @@ export default function Profile() {
   const copyWallet = async () => {
     if (!walletAddress) return;
     await Clipboard.setStringAsync(walletAddress as string);
-    // Alert.alert("Copied", "Wallet address copied");
+    showToast({ type: "success", title: "Copied", message: "Wallet Address Copied" });
+
   };
 
   const handleDeactivate = () => {
@@ -92,7 +94,7 @@ export default function Profile() {
         <Row
           label="Change password"
           icon={<Lock size={20} color="#1E90FF" />}
-          onPress={() => Alert.alert("Password", "Use Clerk security settings")}
+          onPress={() => showToast({type: "info", title : "Password", message : "Use Clerk Security Settings"})}
         />
 
         <Row

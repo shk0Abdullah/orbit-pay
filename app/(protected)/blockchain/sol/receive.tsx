@@ -1,9 +1,9 @@
 import { getSolBalance, loadWallet } from "@/lib/Solana/walletCreate";
+import { showToast } from "@/lib/toast";
 import * as Clipboard from "expo-clipboard";
 import { Copy, Wallet } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   SafeAreaView,
   Text,
   TouchableOpacity,
@@ -19,7 +19,7 @@ const ReceiveSol = () => {
     (async () => {
       const wallet = await loadWallet();
       if (!wallet) {
-        Alert.alert("Wallet not found", "Create a wallet first.");
+        showToast({ type: "error", title: "Wallet not found", message: "Create a Wallet first" });
         return;
       }
 
