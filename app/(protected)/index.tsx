@@ -9,6 +9,7 @@ import { getSolBalance, loadWallet } from "@/lib/Solana/walletCreate";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
+import { router } from "expo-router";
 import { useAtom } from "jotai";
 import React, { useEffect } from "react";
 
@@ -64,7 +65,13 @@ export default function Home() {
 
           {/* Widgets */}
           <View className="flex-row justify-between w-full mt-6">
-            <Widget icon="swap-horizontal" label="Buy/Sell" />
+            <Widget 
+            icon="bar-chart"
+            label="Analytics"
+            onPress={() => {
+              router.push("/analytics");
+            }}
+            />
             <Widget
               icon="download"
               label="Receive"

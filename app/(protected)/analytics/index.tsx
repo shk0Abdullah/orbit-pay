@@ -1,12 +1,10 @@
-import React, { useState, useMemo } from "react";
-import { SafeAreaView, ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
-import { Search, ArrowDown, ArrowUp } from "lucide-react-native";
 import Colors from "@/app/constants/Colors";
-import Fonts from "@/app/constants/Fonts";
-import FontSize from "@/app/constants/FontSize";
 import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
 import { useAuth } from "@clerk/clerk-expo";
+import { useQuery } from "convex/react";
+import { ArrowDown, ArrowUp, Search } from "lucide-react-native";
+import React, { useMemo, useState } from "react";
+import { Dimensions, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 type TimeRange = "D" | "W" | "M" | "Y";
 
@@ -43,37 +41,37 @@ const CustomBarChart = ({ data }: { data: ChartDataPoint[] }) => {
   const maxValue = data[0]?.maxValue || 1;
 
   return (
-    <View style={styles.customChart}>
+    <View className="flex-row h-[250px] relative">
       {/* Y-axis labels */}
-      <View style={styles.yAxisLabels}>
+      <View className="justify-between pr-2 py-2.5">
         {[4, 3, 2, 1, 0].map((i) => (
-          <Text key={i} style={styles.yAxisLabel}>
+          <Text key={i} className="text-[11px] text-[#C4DBF7]">
             {((maxValue * i) / 4 / 1000).toFixed(1)}k
           </Text>
         ))}
       </View>
 
       {/* Bars with horizontal gridlines */}
-      <View style={{ flex: 1 }}>
-        <View style={styles.gridLines} pointerEvents="none">
+      <View className="flex-1">
+        <View className="absolute left-0 right-0 top-2.5 bottom-7.5 justify-between" pointerEvents="none">
           {[0, 1, 2, 3, 4].map((i) => (
-            <View key={i} style={styles.gridLine} />
+            <View key={i} className="h-px bg-[#575886] opacity-20" />
           ))}
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chartScroll}>
-          <View style={styles.barsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-1 z-[1]">
+          <View className="flex-row items-end h-[250px] pb-7.5">
             {data.map((item, index) => {
               const creditHeight = Math.max((item.credit / maxValue) * (chartHeight - 40), 4);
               const debitHeight = Math.max((item.debit / maxValue) * (chartHeight - 40), 4);
 
               return (
-                <View key={index} style={[styles.barGroup, { width: barWidth }]}>
-                  <View style={styles.barWrapper}>
-                    <View style={[styles.bar, styles.barDebit, { height: debitHeight }]} />
-                    <View style={[styles.bar, styles.barCredit, { height: creditHeight }]} />
+                <View key={index} className="items-center px-1.5" style={{ width: barWidth }}>
+                  <View className="flex-1 justify-end" style={{ width: '60%' }}>
+                    <View className="w-full rounded-lg overflow-hidden" style={{ height: debitHeight, backgroundColor: Colors.portfolio.chartSecondary, borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, marginBottom: 2 }} />
+                    <View className="w-full rounded-lg overflow-hidden" style={{ height: creditHeight, backgroundColor: Colors.portfolio.chartPrimary, borderBottomLeftRadius: 8, borderBottomRightRadius: 8, borderTopLeftRadius: 0, borderTopRightRadius: 0 }} />
                   </View>
-                  <Text style={styles.xAxisLabel}>{item.name}</Text>
+                  <Text className="text-[10px] text-[#C4DBF7] mt-2 text-center">{item.name}</Text>
                 </View>
               );
             })}
@@ -86,12 +84,9 @@ const CustomBarChart = ({ data }: { data: ChartDataPoint[] }) => {
 
 // Transaction Item Component
 const TransactionItem = ({ txn }: { txn: PaymentRow }) => (
-  <View style={styles.transactionItem}>
-    <View style={styles.transactionLeft}>
-      <View style={[
-        styles.transactionIcon,
-        txn.type === 'credit' ? styles.transactionIconCredit : styles.transactionIconDebit
-      ]}>
+  <View className="flex-row justify-between items-center bg-[#1D1856] rounded-2xl p-4 mb-3">
+    <View className="flex-row items-center gap-3 flex-1">
+      <View className={`w-10 h-10 rounded-full justify-center items-center ${txn.type === 'credit' ? 'bg-blue-500' : 'bg-red-500'}`}>
         {txn.type === 'credit' ? (
           <ArrowDown size={18} color="#fff" />
         ) : (
@@ -99,19 +94,19 @@ const TransactionItem = ({ txn }: { txn: PaymentRow }) => (
         )}
       </View>
       <View>
-        <Text style={styles.transactionTitle}>
+        <Text className="text-sm font-semibold text-[#EFF3FE]">
           {txn.sender === "You" ? `To ${txn.receiver}` : `From ${txn.sender}`}
         </Text>
-        <Text style={styles.transactionMeta}>
+        <Text className="text-[11px] text-[#C4DBF7] mt-0.5">
           {new Date(txn.createdAt).toLocaleDateString()} • {txn.status}
         </Text>
       </View>
     </View>
-    <View style={styles.transactionRight}>
-      <Text style={styles.transactionAmount}>
+    <View className="items-end">
+      <Text className="text-sm font-semibold text-[#EFF3FE]">
         Rs. {txn.amount.toLocaleString()}
       </Text>
-      <Text style={styles.transactionStatus}>{txn.status}</Text>
+      <Text className="text-[11px] text-[#C4DBF7] mt-0.5">{txn.status}</Text>
     </View>
   </View>
 );
@@ -199,28 +194,22 @@ export default function TransactionAnalytics() {
   }, [transactions, searchQuery]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView className="flex-1 bg-transparent">
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Title */}
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Transactions</Text>
+        <View className="px-6 py-4">
+          <Text className="text-2xl font-bold text-[#EFF3FE]">Transactions</Text>
         </View>
 
         {/* Time Range Selector */}
-        <View style={styles.timeRangeContainer}>
+        <View className="flex-row px-6 py-4 gap-2">
           {(["D", "W", "M", "Y"] as TimeRange[]).map((range) => (
             <TouchableOpacity
               key={range}
               onPress={() => setTimeRange(range)}
-              style={[
-                styles.timeRangeButton,
-                timeRange === range && styles.timeRangeButtonActive
-              ]}
+              className={`flex-1 py-3 rounded-2xl items-center ${timeRange === range ? 'bg-[#575886]' : 'bg-transparent'}`}
             >
-              <Text style={[
-                styles.timeRangeText,
-                timeRange === range && styles.timeRangeTextActive
-              ]}>
+              <Text className={`${timeRange === range ? 'text-[#EFF3FE]' : 'text-[#C4DBF7]'} font-medium`}>
                 {range}
               </Text>
             </TouchableOpacity>
@@ -228,25 +217,25 @@ export default function TransactionAnalytics() {
         </View>
 
         {/* Chart */}
-        <View style={styles.chartContainer}>
+        <View className="px-6 py-4 h-[280px]">
           <CustomBarChart data={chartData} />
         </View>
 
         {/* Search */}
-        <View style={styles.searchContainer}>
+        <View className="flex-row items-center mx-6 my-2 bg-[#1D1856] rounded-2xl px-4 gap-2">
           <Search size={20} color="#666" />
           <TextInput
             placeholder="Search transactions..."
             placeholderTextColor="#666"
             value={searchQuery}
             onChangeText={setSearchQuery}
-            style={styles.searchInput}
+            className="flex-1 py-3 text-[#EFF3FE] text-base"
           />
         </View>
 
         {/* Transaction List */}
-        <View style={styles.transactionList}>
-          <Text style={styles.transactionListTitle}>Recent Transactions</Text>
+        <View className="px-6 py-4">
+          <Text className="text-lg font-semibold text-[#EFF3FE] mb-4">Recent Transactions</Text>
           {filteredTransactions.map((txn) => (
             <TransactionItem key={txn.id} txn={txn} />
           ))}
@@ -255,199 +244,3 @@ export default function TransactionAnalytics() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  scrollContent: {
-    paddingBottom: 100,
-  },
-  titleContainer: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  title: {
-    fontSize: FontSize.xxLarge,
-    fontFamily: Fonts["poppins-bold"],
-    color: Colors.portfolio.textPrimary,
-  },
-  timeRangeContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    gap: 8,
-  },
-  timeRangeButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 16,
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  timeRangeButtonActive: {
-    backgroundColor: Colors.portfolio.cardSecondary,
-  },
-  timeRangeText: {
-    color: Colors.portfolio.textSecondary,
-    fontWeight: '500',
-  },
-  timeRangeTextActive: {
-    color: Colors.portfolio.textPrimary,
-  },
-  chartContainer: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    height: 280,
-  },
-  customChart: {
-    flexDirection: 'row',
-    height: 250,
-    position: 'relative',
-  },
-  yAxisLabels: {
-    justifyContent: 'space-between',
-    paddingRight: 8,
-    paddingVertical: 10,
-  },
-  yAxisLabel: {
-    fontSize: 11,
-    color: Colors.portfolio.textSecondary,
-  },
-  chartScroll: {
-    flex: 1,
-    zIndex: 1,
-  },
-  barsContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    height: 250,
-    paddingBottom: 30,
-  },
-  barGroup: {
-    alignItems: 'center',
-    paddingHorizontal: 6,
-  },
-  barWrapper: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    width: '60%',
-  },
-  bar: {
-    width: '100%',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  barCredit: {
-    backgroundColor: Colors.portfolio.chartPrimary,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
-  },
-  barDebit: {
-    backgroundColor: Colors.portfolio.chartSecondary,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    marginBottom: 2,
-  },
-  xAxisLabel: {
-    fontSize: 10,
-    color: Colors.portfolio.textSecondary,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  gridLines: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 10,
-    bottom: 30,
-    justifyContent: 'space-between',
-  },
-  gridLine: {
-    height: 1,
-    backgroundColor: Colors.portfolio.cardSecondary,
-    opacity: 0.16,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 24,
-    marginVertical: 8,
-    backgroundColor: Colors.portfolio.card,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 12,
-    color: Colors.portfolio.textPrimary,
-    fontSize: FontSize.medium,
-  },
-  transactionList: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  transactionListTitle: {
-    fontSize: FontSize.large,
-    fontFamily: Fonts["poppins-semiBold"],
-    color: Colors.portfolio.textPrimary,
-    marginBottom: 16,
-  },
-  transactionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: Colors.portfolio.card,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-  },
-  transactionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  transactionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  transactionIconCredit: {
-    backgroundColor: '#3b82f6',
-  },
-  transactionIconDebit: {
-    backgroundColor: '#ef4444',
-  },
-  transactionTitle: {
-    fontSize: 14,
-    fontFamily: Fonts["poppins-semiBold"],
-    color: Colors.portfolio.textPrimary,
-  },
-  transactionMeta: {
-    fontSize: 11,
-    color: Colors.portfolio.textSecondary,
-    marginTop: 2,
-  },
-  transactionRight: {
-    alignItems: 'flex-end',
-  },
-  transactionAmount: {
-    fontSize: 14,
-    fontFamily: Fonts["poppins-semiBold"],
-    color: Colors.portfolio.textPrimary,
-  },
-  transactionStatus: {
-    fontSize: 11,
-    color: Colors.portfolio.textSecondary,
-    marginTop: 2,
-  },
-});

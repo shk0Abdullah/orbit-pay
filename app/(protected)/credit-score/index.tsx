@@ -1,22 +1,27 @@
-import React, { useState } from "react";
-import { useUser } from "@clerk/clerk-expo";
-import { useAction } from "convex/react";
+import CreditScoreGauge from "@/app/components/CreditScoreGauge";
+import Colors from "@/app/constants/Colors";
+import { Spacing } from "@/app/constants/Spacing";
 import { api } from "@/convex/_generated/api";
+import { showToast } from "@/lib/toast";
+import { useUser } from "@clerk/clerk-expo";
+import { useAction, useQuery } from "convex/react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
-  View,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
+  View,
 } from "react-native";
-import { Spacing } from "@/app/constants/Spacing";
-import Colors from "@/app/constants/Colors";
-import { showToast } from "@/lib/toast";
 
 export default function CreditScorePage() {
   const { user } = useUser();
   const performPrediction = useAction(api.predictions.predictCreditScore);
+  const latestPrediction = useQuery(
+    api.predictions.getLatestPredictionForClerk,
+    user?.id ? { clerkId: user.id } : "skip"
+  );
 
   const [age, setAge] = useState(21);
   const [monthly_inhand_salary, setSalary] = useState(0);
@@ -29,6 +34,13 @@ export default function CreditScorePage() {
 
   const [result, setResult] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Use latest prediction from DB if available, otherwise use the new result
+  const displayResult = result || (latestPrediction ? {
+    predicted_score: latestPrediction.predicted_score,
+    confidence: latestPrediction.confidence,
+    model_version: latestPrediction.model_version,
+  } : null);
 
   const submit = async () => {
     const input = {
@@ -60,6 +72,21 @@ export default function CreditScorePage() {
         <Text style={{ color: Colors.portfolio.textPrimary, fontSize: 24, marginBottom: Spacing }}>
           Credit Score Prediction
         </Text>
+
+        {/* Gauge Display */}
+        {displayResult && displayResult.predicted_score && (
+          <View style={{ backgroundColor: Colors.portfolio.card, padding: 16, borderRadius: 12, alignItems: 'center', marginBottom: Spacing * 2 }}>
+            <CreditScoreGauge score={displayResult.predicted_score} size={220} strokeWidth={24} />
+            <View style={{ marginTop: Spacing, width: '100%', alignItems: 'center' }}>
+              <Text style={{ color: Colors.portfolio.textSecondary, marginTop: Spacing }}>
+                Confidence: {displayResult.confidence}
+              </Text>
+              <Text style={{ color: Colors.portfolio.textSecondary, marginTop: 4, fontSize: 12 }}>
+                Model version: {displayResult.model_version}
+              </Text>
+            </View>
+          </View>
+        )}
 
         <View style={{ backgroundColor: 'rgba(29,24,86,0.72)', borderRadius: 16, padding: Spacing * 1.5, marginBottom: Spacing }}>
           <View style={{ marginBottom: Spacing }}>
@@ -147,15 +174,6 @@ export default function CreditScorePage() {
           >
             <Text style={{ color: Colors.portfolio.textPrimary }}>{loading ? "Predicting..." : "Predict"}</Text>
           </TouchableOpacity>
-
-          {result && (
-            <View style={{ backgroundColor: Colors.portfolio.card, padding: 16, borderRadius: 12 }}>
-              <Text style={{ color: Colors.portfolio.textPrimary, fontWeight: "bold" }}>Result</Text>
-              <Text style={{ color: Colors.portfolio.textPrimary }}>Score: {result.predicted_score}</Text>
-              <Text style={{ color: Colors.portfolio.textSecondary }}>Confidence: {result.confidence}</Text>
-              <Text style={{ color: Colors.portfolio.textSecondary, marginTop: 8 }}>Model version: {result.model_version}</Text>
-            </View>
-          )}
         </View>
       </ScrollView>
     </SafeAreaView>

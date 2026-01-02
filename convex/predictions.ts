@@ -1,6 +1,6 @@
-import { action, internalMutation, query } from "./_generated/server";
-import { internal } from "./_generated/api";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
+import { action, internalMutation, query } from "./_generated/server";
 
 // Internal mutation to store prediction result in DB. Not callable from client.
 export const recordPrediction = internalMutation({
@@ -94,9 +94,29 @@ export const getPredictionsForCustomer = query({
 export const getPredictionsForClerk = query({
   args: { clerkId: v.string(), limit: v.optional(v.number()) },
   async handler(ctx, { clerkId, limit = 10 }) {
-    return await ctx.db
+    const predictions = await ctx.db
       .query("credit_predictions")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))
-      .take(limit);
+      .collect();
+    
+    // Sort by createdAt descending (most recent first)
+    predictions.sort((a, b) => b.createdAt - a.createdAt);
+    return predictions.slice(0, limit);
+  },
+});
+
+export const getLatestPredictionForClerk = query({
+  args: { clerkId: v.string() },
+  async handler(ctx, { clerkId }) {
+    const predictions = await ctx.db
+      .query("credit_predictions")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))
+      .collect();
+    
+    if (predictions.length === 0) return null;
+    
+    // Sort by createdAt descending and return the most recent one
+    predictions.sort((a, b) => b.createdAt - a.createdAt);
+    return predictions[0];
   },
 });

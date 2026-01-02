@@ -75,12 +75,6 @@ export default function RootLayout() {
       segments: ["(protected)"],
     },
     {
-      name: "Analytics",
-      icon: BarChart,
-      route: "/(protected)/analytics",
-      segments: ["(protected)", "analytics"],
-    },
-    {
       name: "Activity",
       icon: SmartphoneNfc,
       isAction: true,
