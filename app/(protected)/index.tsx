@@ -76,7 +76,7 @@ export default function Home() {
             <Widget
               icon="send"
               label="Send"
-              disabled={solBalance <= 0}
+              disabled={solBalance <= 0 && !dbUser?.balance}
               onPress={() => {
                 setindexActionSheet(true);
                 setIntent("send");

@@ -35,6 +35,20 @@ export default defineSchema({
     .index("by_sender", ["senderUserId"])
     .index("by_receiver", ["receiverUserId"]),
 
+  // Ledger
+  ledger: defineTable({
+    txHash: v.string(),
+    fromPubkey: v.string(),
+    toPubkey: v.string(),
+    amount: v.float64(),
+    parentHashes: v.array(v.string()),
+    signature: v.string(),
+    timestamp: v.float64(),
+    synced: v.boolean(),
+  })
+    .index("by_fromPubkey", ["fromPubkey"])
+    .index("by_toPubkey", ["toPubkey"]),
+
   credit_predictions: defineTable({
     prediction_id: v.string(),
     predicted_score: v.string(),
@@ -57,7 +71,6 @@ export default defineSchema({
     publicKey: v.string(),
     curve: v.literal("ed25519"),
 
-    // Metadata
     createdAt: v.float64(),
   })
     .index("by_user", ["userId"])

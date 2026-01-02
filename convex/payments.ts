@@ -1,5 +1,5 @@
-import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { mutation } from "./_generated/server";
 
 export const createBluetoothPayment = mutation({
   args: {
@@ -52,26 +52,5 @@ export const createBluetoothPayment = mutation({
       status: "completed",
       createdAt: Date.now(),
     });
-  },
-});
-
-export const getBalance = query({
-  args: {
-    clerkId: v.string(),
-  },
-  async handler(ctx, args) {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
-      .first();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    return {
-      balance: user.balance,
-      currency: "PKR",
-    };
   },
 });

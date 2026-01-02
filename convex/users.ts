@@ -75,3 +75,24 @@ export const getUserByClerkId = query({
       .first();
   },
 });
+
+export const getBalance = query({
+  args: {
+    clerkId: v.string(),
+  },
+  async handler(ctx, args) {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .first();
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    return {
+      balance: user.balance,
+      currency: "PKR",
+    };
+  },
+});
