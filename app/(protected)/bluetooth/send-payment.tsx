@@ -1,5 +1,6 @@
 // app/(protected)/bluetooth/send-payment.tsx
 import { api } from "@/convex/_generated/api";
+import { showToast } from "@/lib/toast";
 import { useUser } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -12,7 +13,6 @@ import {
 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -42,26 +42,27 @@ export default function SendPayment() {
     console.log(parseFloat(amount) <= balanceData?.balance!);
     console.log(typeof balanceData?.balance);
     if (!amount || parseFloat(amount) <= 0) {
-      Alert.alert("Invalid Amount", "Please enter a valid amount");
+      showToast({ type: "error", title: "Invalid amount", message: "Invalid amount" });
+
       setSuccess(false);
       return;
     }
     if (parseInt(amount) >= balanceData?.balance!) {
-      Alert.alert("Insufficient Amount");
+      showToast({ type: "error", title: "Insufficient amount", message: "Insufficient amount" });
       setSuccess(false);
 
       return;
     }
 
     if (!senderName.trim()) {
-      Alert.alert("Invalid Name", "Please enter your name");
+      showToast({ type: "error", title: "Invalid Name", message: "Please enter your name" });
       setSuccess(false);
 
       return;
     }
 
     if (!deviceId) {
-      Alert.alert("Error", "Device not connected");
+      showToast({ type: "error", title: "Connection Error", message: "Device not connected" });
       setSuccess(false);
 
       return;
@@ -102,7 +103,8 @@ export default function SendPayment() {
       }, 5000);
     } catch (err) {
       console.error("WRITE ERROR", err);
-      Alert.alert("Send Failed", "Could not send payment");
+      showToast({ type: "error", title: "Payment Failed", message: "Could not send your payment" });
+
     } finally {
       setSending(false);
     }
@@ -245,9 +247,8 @@ export default function SendPayment() {
           <TouchableOpacity
             onPress={sendPayment}
             disabled={sending}
-            className={`rounded-2xl p-5 flex-row items-center justify-center ${
-              sending ? "bg-[#4710cb]/50" : "bg-[#4710cb]"
-            }`}
+            className={`rounded-2xl p-5 flex-row items-center justify-center ${sending ? "bg-[#4710cb]/50" : "bg-[#4710cb]"
+              }`}
           >
             <Send size={20} color="#c0f667" />
             <Text className="text-[#f5f5f5] text-lg font-bold ml-2">

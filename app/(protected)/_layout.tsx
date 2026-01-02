@@ -7,7 +7,6 @@ import {
   useSegments,
 } from "expo-router";
 import {
-  Alert,
   Image,
   ImageBackground,
   ScrollView,
@@ -32,6 +31,7 @@ import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import RNBluetoothClassic from "react-native-bluetooth-classic";
 import { indexActionSheet, intentAtom } from "../store/Atom";
+import { showToast } from "@/lib/toast";
 
 export default function RootLayout() {
   const segments = useSegments();
@@ -50,9 +50,11 @@ export default function RootLayout() {
       }
       const updated = await RNBluetoothClassic.isBluetoothEnabled();
       setBleEnabled(updated);
-      Alert.alert(updated ? "Bluetooth Enabled" : "Bluetooth Disabled");
+      showToast({ type: "success", title: updated ? "Bluetooth Enabled" : "Bluetooth Disabled", message: updated ? "Bluetooth Enabled" : "Bluetooth Disabled" });
+
     } catch {
-      Alert.alert("Failed to enable Bluetooth");
+      showToast({ type: "error", title: "Bluetooth", message: "Failed to ena" });
+
     }
   };
 
@@ -130,9 +132,8 @@ export default function RootLayout() {
 
               <TouchableOpacity
                 onPress={enableBluetooth}
-                className={`p-2.5 rounded-full ${
-                  bleEnabled ? "bg-[#001C71]" : "bg-[#99838395]"
-                }`}
+                className={`p-2.5 rounded-full ${bleEnabled ? "bg-[#001C71]" : "bg-[#99838395]"
+                  }`}
               >
                 {bleEnabled ? (
                   <Bluetooth size={20} color="#86D2FF" />
@@ -202,9 +203,8 @@ export default function RootLayout() {
 
                     {/* Active underline */}
                     <View
-                      className={`mt-1 h-[3px] rounded-full ${
-                        active ? "w-6 bg-[#001C71]" : "w-0"
-                      }`}
+                      className={`mt-1 h-[3px] rounded-full ${active ? "w-6 bg-[#001C71]" : "w-0"
+                        }`}
                     />
                   </TouchableOpacity>
                 );

@@ -6,7 +6,6 @@ import { useAtom } from "jotai";
 import * as React from "react";
 import { useEffect } from "react";
 import {
-  Alert,
   ImageBackground,
   Text,
   TextInput,
@@ -20,6 +19,7 @@ import {
   getSolBalance,
   loadWallet,
 } from "@/lib/Solana/walletCreate";
+import { showToast } from "@/lib/toast";
 const phoneRegex = /^\d{4}-\d{7}$/;
 const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
 
@@ -51,7 +51,7 @@ export default function SignUpScreen() {
   const createUser = useMutation(api.users.createOrGetUser);
   useEffect(() => {
     init();
-  }, []);
+  });
 
   async function init() {
     const w = await loadWallet();
@@ -68,19 +68,20 @@ export default function SignUpScreen() {
 
   async function onCreateWallet() {
     const pubKey = await createWallet();
-    Alert.alert("Wallet Created", pubKey);
+    showToast({type : "success", title: "Wallet Created", message: `{pubKey}` });
+
     init();
   }
   const onSignUpPress = async () => {
     if (!isLoaded) return;
 
     if (!phoneRegex.test(signup.phone)) {
-      Alert.alert("Invalid phone", "Use format 0300-1234567");
+      showToast({ type: "error", title: "Invalid phone", message: "Use format 0300-1234567" });
       return;
     }
 
     if (!cnicRegex.test(signup.cnic)) {
-      Alert.alert("Invalid CNIC", "Use format 12345-6789123-4");
+      showToast({ type: "error", title: "Invalid CNIC", message: "Use format 12345-6789123-4" });
       return;
     }
     console.log("Started to create the user");
