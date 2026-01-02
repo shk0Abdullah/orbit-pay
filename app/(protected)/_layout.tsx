@@ -25,6 +25,7 @@ import {
   QrCode,
   SmartphoneNfc,
   User,
+  BarChart,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 
@@ -70,6 +71,12 @@ export default function RootLayout() {
       icon: Home,
       route: "/(protected)",
       segments: ["(protected)"],
+    },
+    {
+      name: "Analytics",
+      icon: BarChart,
+      route: "/(protected)/analytics",
+      segments: ["(protected)", "analytics"],
     },
     {
       name: "Activity",
