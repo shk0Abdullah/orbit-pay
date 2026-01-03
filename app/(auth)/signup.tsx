@@ -5,6 +5,7 @@ import {
   getSolBalance,
   loadWallet,
 } from "@/lib/Solana/walletCreate";
+import { showToast } from "@/lib/toast";
 import { useSignUp } from "@clerk/clerk-expo";
 import { useMutation } from "convex/react";
 import { Link, useRouter } from "expo-router";
@@ -18,12 +19,6 @@ import {
   View,
 } from "react-native";
 
-import {
-  createWallet,
-  getSolBalance,
-  loadWallet,
-} from "@/lib/Solana/walletCreate";
-import { showToast } from "@/lib/toast";
 const phoneRegex = /^\d{4}-\d{7}$/;
 const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
 
@@ -58,7 +53,7 @@ export default function SignUpScreen() {
 
   useEffect(() => {
     init();
-  });
+  }, []);
 
   async function init() {
     const wallet = await loadWallet();
@@ -69,22 +64,24 @@ export default function SignUpScreen() {
     setBalance(bal);
   }
 
-  async function onCreateWallet() {
-    const pubKey = await createWallet();
-    showToast({type : "success", title: "Wallet Created", message: `{pubKey}` });
-
-    init();
-  }
   const onSignUpPress = async () => {
     if (!isLoaded) return;
 
     if (!phoneRegex.test(signup.phone)) {
-      showToast({ type: "error", title: "Invalid phone", message: "Use format 0300-1234567" });
+      showToast({
+        type: "error",
+        title: "Invalid phone",
+        message: "Use format 0300-1234567",
+      });
       return;
     }
 
     if (!cnicRegex.test(signup.cnic)) {
-      showToast({ type: "error", title: "Invalid CNIC", message: "Use format 12345-6789123-4" });
+      showToast({
+        type: "error",
+        title: "Invalid CNIC",
+        message: "Use format 12345-6789123-4",
+      });
       return;
     }
 
@@ -119,12 +116,20 @@ export default function SignUpScreen() {
 
     // Create wallet AFTER user exists
     if (!userId || !userId._id) {
-      Alert.alert("Error", "Failed to create user or missing user ID");
+      showToast({
+        type: "error",
+        title: "Failed to Create User",
+        message: "User already Exists or missing user ID",
+      });
       return;
     }
     const publicKey = await createWallet(userId._id, createWalletMutation);
 
-    Alert.alert("Wallet Created", publicKey);
+    showToast({
+      type: "success",
+      title: "Wallet Created",
+      message: `${publicKey}`,
+    });
 
     await init();
 
