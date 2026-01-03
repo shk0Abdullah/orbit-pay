@@ -37,6 +37,9 @@ export default function BluetoothServer() {
   const acceptingRef = useRef(false);
   const connectedRef = useRef(false);
 
+  /* ==========  NEW  ––  deduplication flag  ========== */
+  const handledRef = useRef(false);
+
   /* ---------- animations – always declared ---------- */
   const spinValue = useRef(new Animated.Value(0)).current;
   const pulseValue = useRef(new Animated.Value(1)).current;
@@ -60,6 +63,7 @@ export default function BluetoothServer() {
     }
   };
 
+  /* ---------- bluetooth server ---------- */
   const startServer = async () => {
     if (acceptingRef.current || connectedRef.current) return;
     try {
@@ -67,7 +71,9 @@ export default function BluetoothServer() {
       const device = await RNBluetoothClassic.accept({});
       acceptingRef.current = false;
       connectedRef.current = true;
+
       setConnection(device);
+      await Promise.resolve(); // <-- NEW – flush React setState
       listenForMessages(device);
     } catch (err) {
       acceptingRef.current = false;
@@ -75,22 +81,27 @@ export default function BluetoothServer() {
     }
   };
 
+  /* ---------- message handler ---------- */
   const listenForMessages = (device: BluetoothDevice) => {
     const sub = RNBluetoothClassic.onDeviceRead(device.id, async (event) => {
       try {
         const json = JSON.parse(event.data);
+
+        /* ==========  NEW  ––  skip duplicates  ========== */
+        if (handledRef.current) return;
+        handledRef.current = true;
+
         setReceivedPayment(json);
         if (!user) return;
 
-        await createBluetoothPayment({
-          senderClerkId: json.senderClerkId,
-          receiverClerkId: user.id,
-          amount: json.amount,
-          bluetoothDeviceAddress: device.address,
-          bluetoothDeviceName: device.name ?? undefined,
-        });
-
         if (receiverWallet) {
+          await createBluetoothPayment({
+            senderClerkId: json.senderClerkId ?? json.fromPubkey, // fallback
+            receiverClerkId: user.id,
+            amount: json.amount,
+            bluetoothDeviceAddress: device.address,
+            bluetoothDeviceName: device.name ?? undefined,
+          });
           const ack = {
             type: "PAYMENT_ACK",
             toPubkey: receiverWallet,
@@ -105,6 +116,7 @@ export default function BluetoothServer() {
           router.canGoBack() ? router.back() : router.replace("/(protected)");
         }
       } catch (e) {
+        handledRef.current = false; // allow retry on real error
         console.log("SERVER MESSAGE ERROR:", e);
       }
     });

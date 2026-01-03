@@ -107,7 +107,6 @@ export default function SendPayment() {
     const payload = {
       amount: amount,
       currency: "PKR",
-      // txId: crypto.randomUUID(),
       senderName: user?.primaryEmailAddress,
       senderClerkId: user?.id,
       time: Date.now(),
