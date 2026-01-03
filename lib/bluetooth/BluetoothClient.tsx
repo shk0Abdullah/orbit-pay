@@ -8,7 +8,6 @@ import {
 } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Animated,
   Easing,
   FlatList,
@@ -19,6 +18,7 @@ import {
 import RNBluetoothClassic, {
   BluetoothDevice,
 } from "react-native-bluetooth-classic";
+import { showToast } from "../toast";
 
 export default function BluetoothClient() {
   const [devices, setDevices] = useState<BluetoothDevice[]>([]);
@@ -62,7 +62,7 @@ export default function BluetoothClient() {
 
       setDevices(combined);
     } catch {
-      Alert.alert("Scan failed");
+      showToast({type : "error", title : "Scan Failed", message : "Scan Failed"})
     } finally {
       setLoading(false);
       stopScanAnimation();
@@ -98,7 +98,8 @@ export default function BluetoothClient() {
       });
     } catch (err) {
       console.log("CLIENT CONNECT ERROR:", err);
-      Alert.alert("Connection failed");
+      showToast({type : "error", title : "Connection Failed", message : "Connection Failed"})
+
     } finally {
       connectingRef.current = false;
     }

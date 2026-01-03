@@ -1,6 +1,7 @@
 // app/(protected)/bluetooth/send-payment.tsx
 import { walletAtom } from "@/app/store/Atom";
 import { api } from "@/convex/_generated/api";
+import { showToast } from "@/lib/toast";
 import { useUser } from "@clerk/clerk-expo";
 import { useAction, useQuery } from "convex/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -89,18 +90,28 @@ export default function SendPayment() {
   };
 
   const sendPayment = async () => {
+    console.log(balanceData?.balance);
+    console.log(parseFloat(amount) <= balanceData?.balance!);
+    console.log(typeof balanceData?.balance);
     if (amount <= 0) {
-      Alert.alert("Invalid Amount", "Please enter a valid amount");
+      showToast({ type: "error", title: "Invalid amount", message: "Invalid amount" });
+
       setSuccess(false);
       return;
     }
     if (amount > balance?.balance!) {
-      Alert.alert("Insufficient Balance", "You don’t have enough balance");
+      showToast({ type: "error", title: "Insufficient amount", message: "Insufficient amount" });
+      setSuccess(false);
+
+      return;
+    }
+
+ 
       setSuccess(false);
       return;
     }
     if (!deviceId) {
-      Alert.alert("Device/Wallet Error", "Receiver information missing");
+      showToast({ type: "error", title: "Connection Error", message: "Device not connected" });
       setSuccess(false);
       return;
     }
@@ -154,9 +165,9 @@ export default function SendPayment() {
         }
       }, 2000);
     } catch (err) {
-      console.error("SEND ERROR", err);
-      Alert.alert("Send Failed", "Could not send payment");
-      setSuccess(false);
+      console.error("WRITE ERROR", err);
+      showToast({ type: "error", title: "Payment Failed", message: "Could not send your payment" });
+
     } finally {
       setSending(false);
     }

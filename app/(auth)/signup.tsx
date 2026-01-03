@@ -11,7 +11,6 @@ import { Link, useRouter } from "expo-router";
 import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   ImageBackground,
   Text,
   TextInput,
@@ -19,6 +18,12 @@ import {
   View,
 } from "react-native";
 
+import {
+  createWallet,
+  getSolBalance,
+  loadWallet,
+} from "@/lib/Solana/walletCreate";
+import { showToast } from "@/lib/toast";
 const phoneRegex = /^\d{4}-\d{7}$/;
 const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
 
@@ -53,7 +58,7 @@ export default function SignUpScreen() {
 
   useEffect(() => {
     init();
-  }, []);
+  });
 
   async function init() {
     const wallet = await loadWallet();
@@ -64,16 +69,22 @@ export default function SignUpScreen() {
     setBalance(bal);
   }
 
+  async function onCreateWallet() {
+    const pubKey = await createWallet();
+    showToast({type : "success", title: "Wallet Created", message: `{pubKey}` });
+
+    init();
+  }
   const onSignUpPress = async () => {
     if (!isLoaded) return;
 
     if (!phoneRegex.test(signup.phone)) {
-      Alert.alert("Invalid phone", "Use format 0300-1234567");
+      showToast({ type: "error", title: "Invalid phone", message: "Use format 0300-1234567" });
       return;
     }
 
     if (!cnicRegex.test(signup.cnic)) {
-      Alert.alert("Invalid CNIC", "Use format 12345-6789123-4");
+      showToast({ type: "error", title: "Invalid CNIC", message: "Use format 12345-6789123-4" });
       return;
     }
 

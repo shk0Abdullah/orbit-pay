@@ -1,5 +1,6 @@
 import { balanceAtom, walletAtom } from "@/app/store/Atom";
 import { loadWallet, sendSol } from "@/lib/Solana/walletCreate";
+import { showToast } from "@/lib/toast";
 import { PublicKey } from "@solana/web3.js";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useAtom } from "jotai";
@@ -7,7 +8,6 @@ import { QrCode, Send } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   SafeAreaView,
   Text,
@@ -44,30 +44,32 @@ const SendSol = () => {
       setToAddress(data);
       setScanOpen(false);
     } else {
-      Alert.alert("Invalid QR", "Not a valid Solana address");
+      showToast({ type: "error", title: "Invalid QR", message: "Not a valid Solana address" });
+
     }
   };
 
   /* -------- Send -------- */
   const handleSend = async () => {
     if (!toAddress || !amount) {
-      Alert.alert("Missing fields", "Enter address and amount");
+      showToast({ type: "error", title: "Missing Fields", message: "Enter address and amount" });
       return;
     }
 
     if (!isValidAddress(toAddress)) {
-      Alert.alert("Invalid Address");
+      showToast({ type: "error", title: "Invalid address", message: "Invalid Address" });
       return;
     }
 
     const solAmount = Number(amount);
     if (isNaN(solAmount) || solAmount <= 0) {
-      Alert.alert("Invalid Amount");
+      showToast({ type: "error", title: "Invalid amount", message: "Invalid amount" });
       return;
     }
 
     if (balance !== null && solAmount + ESTIMATED_FEE > balance) {
-      Alert.alert("Insufficient Balance", "Amount + fees exceed balance");
+      showToast({ type: "error", title: "Insufficient Balance", message: "Amount + Fees exceed balance" });
+
       return;
     }
 
@@ -78,11 +80,12 @@ const SendSol = () => {
 
       const sig = await sendSol(sender, toAddress, solAmount);
 
-      Alert.alert("Success 🎉", `Transaction sent\n\n${sig}`);
+      showToast({ type: "success", title: "Transaction Sent", message: `Transaction sent\n\n${sig}` });
+
       setAmount("");
       setToAddress("");
     } catch (e: any) {
-      Alert.alert("Failed", e.message);
+      showToast({type: "error", title : "Failed", message : `${e.message}`})
     } finally {
       setLoading(false);
     }
