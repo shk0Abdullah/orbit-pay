@@ -5,11 +5,11 @@ import { showToast } from "@/lib/toast";
 import { useUser } from "@clerk/clerk-expo";
 import { useAction, useQuery } from "convex/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
+
 import { useAtom } from "jotai";
 import { CheckCircle, Send, Wallet } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -90,28 +90,33 @@ export default function SendPayment() {
   };
 
   const sendPayment = async () => {
-    console.log(balanceData?.balance);
-    console.log(parseFloat(amount) <= balanceData?.balance!);
-    console.log(typeof balanceData?.balance);
     if (amount <= 0) {
-      showToast({ type: "error", title: "Invalid amount", message: "Invalid amount" });
+      showToast({
+        type: "error",
+        title: "Invalid amount",
+        message: "Invalid amount",
+      });
 
       setSuccess(false);
       return;
     }
     if (amount > balance?.balance!) {
-      showToast({ type: "error", title: "Insufficient amount", message: "Insufficient amount" });
+      showToast({
+        type: "error",
+        title: "Insufficient amount",
+        message: "Insufficient amount",
+      });
       setSuccess(false);
 
       return;
     }
 
- 
-      setSuccess(false);
-      return;
-    }
     if (!deviceId) {
-      showToast({ type: "error", title: "Connection Error", message: "Device not connected" });
+      showToast({
+        type: "error",
+        title: "Connection Error",
+        message: "Device not connected",
+      });
       setSuccess(false);
       return;
     }
@@ -165,9 +170,13 @@ export default function SendPayment() {
         }
       }, 2000);
     } catch (err) {
-      console.error("WRITE ERROR", err);
-      showToast({ type: "error", title: "Payment Failed", message: "Could not send your payment" });
-
+      console.error("SEND ERROR", err);
+      showToast({
+        type: "error",
+        title: "Payment Failed",
+        message: "Could not send your payment",
+      });
+      setSuccess(false);
     } finally {
       setSending(false);
     }
