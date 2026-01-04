@@ -158,10 +158,8 @@ export default function BluetoothClient() {
       <View className="px-6 pt-6 pb-4">
         <View className="flex-row items-center mb-4">
           <View>
-            <Text className="text-[#ffffff] text-2xl font-bold">
-              Find Devices
-            </Text>
-            <Text className="text-[#f5f5f5]/60 text-sm">
+            <Text className="text-white text-2xl font-bold">Find Devices</Text>
+            <Text className="text-white/60 text-sm">
               {devices.length} device{devices.length !== 1 ? "s" : ""} found
             </Text>
           </View>
@@ -185,14 +183,14 @@ export default function BluetoothClient() {
               >
                 <Search size={20} color="#86D2FF" />
               </Animated.View>
-              <Text className="text-[#f5f5f5] text-base font-bold">
+              <Text className="text-white text-base font-bold">
                 Scanning...
               </Text>
             </>
           ) : (
             <>
               <Search size={20} color="#86D2FF" className="mr-3" />
-              <Text className="text-[#f5f5f5] text-base font-bold ml-2">
+              <Text className="text-white text-base font-bold ml-2">
                 Scan for Devices
               </Text>
             </>
@@ -207,10 +205,10 @@ export default function BluetoothClient() {
             <View className="w-20 h-20 rounded-full bg-[#4710cb]/20 items-center justify-center mb-4">
               <Bluetooth size={32} color="#86D2FF" />
             </View>
-            <Text className="text-[#f5f5f5] text-lg font-semibold mb-2">
+            <Text className="text-white text-lg font-semibold mb-2">
               No Devices Found
             </Text>
-            <Text className="text-[#f5f5f5]/60 text-sm text-center">
+            <Text className="text-white/60 text-sm text-center">
               Tap the scan button to discover nearby devices
             </Text>
           </View>
@@ -225,7 +223,7 @@ export default function BluetoothClient() {
                 onPress={() =>
                   item.bonded ? connectTo(item) : pairDevice(item)
                 }
-                className="bg-[#f5f5f5]/10 border border-[#f5f5f5]/20 rounded-2xl p-4 mb-3"
+                className="bg-white/10 border border-[#f5f5f5]/20 rounded-2xl p-4 mb-3"
               >
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center flex-1">
@@ -241,10 +239,10 @@ export default function BluetoothClient() {
                       )}
                     </View>
                     <View className="flex-1">
-                      <Text className="text-[#f5f5f5] text-base font-semibold mb-1">
+                      <Text className="text-white text-base font-semibold mb-1">
                         {item.name || "Unknown Device"}
                       </Text>
-                      <Text className="text-[#f5f5f5]/60 text-xs font-mono">
+                      <Text className="text-white/60 text-xs font-mono">
                         {item.address}
                       </Text>
                       {!item.bonded && (

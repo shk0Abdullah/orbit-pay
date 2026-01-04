@@ -66,7 +66,6 @@ export default function RootLayout() {
     return <Redirect href="/(auth)/signin" />;
   }
 
-  /* ---------------- Bottom Tabs ---------------- */
   const navItems = [
     {
       name: "Home",
