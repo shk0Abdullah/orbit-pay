@@ -6,6 +6,7 @@ import {
 } from "@/app/store/Atom";
 import { api } from "@/convex/_generated/api";
 import { getSolBalance, loadWallet } from "@/lib/Solana/walletCreate";
+import { getSolanaPrice } from "@/lib/coingecko";
 import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
@@ -32,6 +33,10 @@ export default function Home() {
     api.users.getUserByClerkId,
     userId ? { clerkId: userId } : "skip"
   );
+  const [solanaPrice, setSolanaPrice] = React.useState<{
+    usd: number;
+    usd_24h_change: number;
+  } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -43,7 +48,15 @@ export default function Home() {
     })();
   }, []);
 
-  const total = Number(dbUser?.balance || 0) + solBalance;
+  useEffect(() => {
+    (async () => {
+      const price = await getSolanaPrice();
+      setSolanaPrice(price);
+    })();
+  }, []);
+
+  const solValue = solBalance * (solanaPrice?.usd || 0);
+  const total = Number(dbUser?.balance || 0) + solValue;
 
   return (
     <>
@@ -59,18 +72,18 @@ export default function Home() {
 
           {/* Balances */}
           <View className="flex-row justify-between w-full mt-6">
-            <BalanceBox label="Coins" value={`$${solBalance}`} />
+            <BalanceBox label="Coins" value={`$${solValue.toFixed(2)}`} />
             <BalanceBox label="Cash" value={`$${dbUser?.balance || 0}`} />
           </View>
 
           {/* Widgets */}
           <View className="flex-row justify-between w-full mt-6">
-            <Widget 
-            icon="bar-chart"
-            label="Analytics"
-            onPress={() => {
-              router.push("/analytics");
-            }}
+            <Widget
+              icon="bar-chart"
+              label="Analytics"
+              onPress={() => {
+                router.push("/analytics");
+              }}
             />
             <Widget
               icon="download"
@@ -103,7 +116,16 @@ export default function Home() {
           <View className="flex-1">
             <Text className="text-white font-bold">Solana</Text>
             <Text className="text-green-300 font-semibold mt-1">
-              $4.75 +3.54%
+              ${solanaPrice?.usd.toFixed(2) || "0.00"}{" "}
+              <Text
+                className={
+                  (solanaPrice?.usd_24h_change || 0) >= 0
+                    ? "text-green-300"
+                    : "text-red-400"
+                }
+              >
+                {solanaPrice?.usd_24h_change.toFixed(2) || "0.00"}%
+              </Text>
             </Text>
           </View>
 
@@ -127,9 +149,8 @@ const BalanceBox = ({ label, value }: any) => (
 const Widget = ({ icon, label, disabled, onPress }: any) => (
   <TouchableOpacity
     disabled={disabled}
-    className={`w-20 h-20 rounded-2xl items-center justify-center ${
-      disabled ? "bg-[#46484c]" : "bg-[#0B1E5B]"
-    }`}
+    className={`w-20 h-20 rounded-2xl items-center justify-center ${disabled ? "bg-[#46484c]" : "bg-[#0B1E5B]"
+      }`}
     onPress={onPress}
   >
     <Ionicons name={icon} size={26} color="white" />

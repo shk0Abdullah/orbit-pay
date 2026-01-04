@@ -69,16 +69,15 @@ export default function CreditScoreGauge({
   const label = getLabel(safeScore);
 
   const needle = polar(angle);
+  // Fixed viewBox to show the full gauge including top text
   const visibleHeight = Math.round(size / 2 + 50);
-  const viewBoxStartY = Math.round(cy - 25);
-  const viewBoxHeight = size - viewBoxStartY; // Height of coordinate space to show
 
   return (
     <View className="items-center justify-center my-8">
       <Svg
         width={size}
         height={visibleHeight}
-        viewBox={`0 ${viewBoxStartY} ${size} ${viewBoxHeight}`}
+        viewBox={`0 0 ${size} ${cy + 50}`}
       >
 
           {/* Background Arc */}
