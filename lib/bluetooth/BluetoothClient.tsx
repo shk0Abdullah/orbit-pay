@@ -11,6 +11,7 @@ import {
   Animated,
   Easing,
   FlatList,
+  LogBox,
   Text,
   TouchableOpacity,
   View,
@@ -19,6 +20,8 @@ import RNBluetoothClassic, {
   BluetoothDevice,
 } from "react-native-bluetooth-classic";
 import { showToast } from "../toast";
+
+LogBox.ignoreLogs(["VirtualizedLists should never be nested"]);
 
 export default function BluetoothClient() {
   const [devices, setDevices] = useState<BluetoothDevice[]>([]);
@@ -62,7 +65,11 @@ export default function BluetoothClient() {
 
       setDevices(combined);
     } catch {
-      showToast({type : "error", title : "Scan Failed", message : "Scan Failed"})
+      showToast({
+        type: "error",
+        title: "Scan Failed",
+        message: "Scan Failed",
+      });
     } finally {
       setLoading(false);
       stopScanAnimation();
@@ -98,8 +105,11 @@ export default function BluetoothClient() {
       });
     } catch (err) {
       console.log("CLIENT CONNECT ERROR:", err);
-      showToast({type : "error", title : "Connection Failed", message : "Connection Failed"})
-
+      showToast({
+        type: "error",
+        title: "Connection Failed",
+        message: "Connection Failed",
+      });
     } finally {
       connectingRef.current = false;
     }
