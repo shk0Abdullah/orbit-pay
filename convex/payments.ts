@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const createBluetoothPayment = mutation({
   args: {
@@ -150,7 +150,9 @@ export const getRecentPaymentsWithUsers = query({
     const populated = await Promise.all(
       sliced.map(async (p) => {
         const sender = p.senderUserId ? await ctx.db.get(p.senderUserId) : null;
-        const receiver = p.receiverUserId ? await ctx.db.get(p.receiverUserId) : null;
+        const receiver = p.receiverUserId
+          ? await ctx.db.get(p.receiverUserId)
+          : null;
         return { ...p, sender, receiver };
       })
     );

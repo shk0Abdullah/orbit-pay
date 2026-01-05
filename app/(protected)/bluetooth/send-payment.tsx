@@ -1,11 +1,214 @@
+// // app/(protected)/bluetooth/send-payment.tsx
+// import { walletAtom } from "@/app/store/Atom";
+// import { api } from "@/convex/_generated/api";
+// import { generateTxHash } from "@/lib/crypto";
+// import { LocalLedger } from "@/lib/localLedger/localLedger";
+// import { showToast } from "@/lib/toast";
+// import { useUser } from "@clerk/clerk-expo";
+// import { useAction, useQuery } from "convex/react";
+// import { useLocalSearchParams, useRouter } from "expo-router";
+// import { useAtom } from "jotai";
+// import { CheckCircle, Send, Wallet } from "lucide-react-native";
+// import React, { useState } from "react";
+// import {
+//   Image,
+//   KeyboardAvoidingView,
+//   Platform,
+//   Text,
+//   TextInput,
+//   TouchableOpacity,
+//   View,
+// } from "react-native";
+
+// import RNBluetoothClassic from "react-native-bluetooth-classic";
+
+// // Theme Colors
+// const COLORS = {
+//   deepMidnight: "#0B1E5B",
+//   royalBlue: "#1A459D",
+//   azureSky: "#4A90E2",
+//   electricCyan: "#86D2FF",
+//   pureWhite: "#FFFFFF",
+//   greenAccent: "#c0f667",
+// };
+// export default function SendPayment() {
+//   const { user } = useUser();
+//   const router = useRouter();
+//   const params = useLocalSearchParams();
+//   const { deviceId, deviceName, deviceAddress } = params;
+//   const [userWalletPublicKey] = useAtom(walletAtom);
+//   const [amount, setAmount] = useState<number>(0);
+//   // const [balance] = useAtom(balanceAtom);//Sol
+
+//   const [sending, setSending] = useState(false);
+//   const [success, setSuccess] = useState(false);
+
+//   // Fetch balance from ledger
+//   const balance = useQuery(api.users.getBalance, {
+//     clerkId: user?.id!,
+//   });
+
+//   // Helper: get last transaction hash for Merkle DAG polyfill
+//   // const lastTx = useQuery(api.ledger.getLastTransaction, {
+//   //   publicKey: userWalletPublicKey as string,
+//   // });
+
+//   // Action hook for creating ledger transaction
+//   const createLedgerTx = useAction(api.ledgerNodeAction.createLedgerTxAction);
+
+//   const listenForAck = (
+//     deviceId: string
+//   ): Promise<{
+//     type: string;
+//     toPubkey: string;
+//     accepted: boolean;
+//   }> => {
+//     return new Promise((resolve, reject) => {
+//       const timeout = setTimeout(() => {
+//         sub?.remove();
+//         reject(new Error("ACK_TIMEOUT"));
+//       }, 15000);
+
+//       const sub = RNBluetoothClassic.onDeviceRead(deviceId, (event) => {
+//         try {
+//           const msg = JSON.parse(event.data);
+
+//           if (msg.type !== "PAYMENT_ACK") return;
+//           if (!msg.accepted) return;
+//           if (!msg.toPubkey) {
+//             console.log("Client: No Receiver Wallet ACK Found");
+//           }
+
+//           clearTimeout(timeout);
+//           sub.remove();
+
+//           resolve(msg);
+//         } catch (e) {
+//           console.log("CLIENT ACK PARSE ERROR", e);
+//         }
+//       });
+//     });
+//   };
+
+//   const sendPayment = async () => {
+//     if (amount <= 0) {
+//       showToast({
+//         type: "error",
+//         title: "Invalid amount",
+//         message: "Invalid amount",
+//       });
+
+//       setSuccess(false);
+//       return;
+//     }
+//     if (amount > balance?.balance!) {
+//       showToast({
+//         type: "error",
+//         title: "Insufficient amount",
+//         message: "Insufficient amount",
+//       });
+//       setSuccess(false);
+
+//       return;
+//     }
+
+//     if (!deviceId) {
+//       showToast({
+//         type: "error",
+//         title: "Connection Error",
+//         message: "Device not connected",
+//       });
+//       setSuccess(false);
+//       return;
+//     }
+//     const payload = {
+//       amount: amount,
+//       currency: "PKR",
+//       senderName: user?.primaryEmailAddress,
+//       senderClerkId: user?.id,
+//       time: Date.now(),
+//     };
+//     const ledgerPayload = {
+//       fromPubkey: userWalletPublicKey,
+//       amount: amount,
+//       timestamp: Date.now(),
+//     };
+
+//     try {
+//       setSending(true);
+
+//       console.log("Writing From Client");
+//       await RNBluetoothClassic.writeToDevice(
+//         deviceId as string,
+//         JSON.stringify(payload) + "\n"
+//       );
+
+//       const ack = await listenForAck(deviceId as string);
+//       console.log("ACK received:", ack);
+//       const ledger = new LocalLedger();
+//       const tips = ledger.getTips();
+
+//       const parentHashes =
+//         tips.length >= 2
+//           ? [tips[0].txHash, tips[1].txHash]
+//           : tips.map((t) => t.txHash);
+//       // Insert into ledger (offline-first)
+//       // const ledgerEntry = await createLedgerTx({
+//       //   fromPubkey: ledgerPayload.fromPubkey as string,
+//       //   toPubkey: ack.toPubkey as string,
+//       //   amount: payload.amount,
+//       //   parentHashes: parentHashes,
+//       //   signature: "offline-simulated-signature",
+//       // });
+//       const txData = `${ledgerPayload.fromPubkey as string}:${ack.toPubkey as string}:${payload.amount}:${Date.now()}:${parentHashes.join(",")}`;
+//       const txHash = await generateTxHash(txData);
+//       ledger.addTransaction({
+//         txHash,
+//         fromPubkey: ledgerPayload.fromPubkey as string,
+//         toPubkey: ack.toPubkey as string,
+//         amount,
+//         parentHashes,
+//         timestamp: Date.now(),
+//         synced: false,
+//       });
+//       console.log("Ledger entry created:");
+//       ledger.sync(createLedgerTx);
+
+//       setSuccess(true);
+
+//       // Auto-disconnect after 2 seconds and go back
+//       setTimeout(async () => {
+//         try {
+//           await RNBluetoothClassic.disconnectFromDevice(deviceId as string);
+//         } catch {}
+//         if (router.canGoBack()) {
+//           router.back();
+//         } else {
+//           router.replace("/(protected)");
+//         }
+//       }, 2000);
+//     } catch (err) {
+//       console.error("SEND ERROR", err);
+//       showToast({
+//         type: "error",
+//         title: "Payment Failed",
+//         message: "Could not send your payment",
+//       });
+//       setSuccess(false);
+//     } finally {
+//       setSending(false);
+//     }
+//   };
+
 // app/(protected)/bluetooth/send-payment.tsx
 import { walletAtom } from "@/app/store/Atom";
 import { api } from "@/convex/_generated/api";
+import { generateTxHash } from "@/lib/crypto";
+import { LocalLedger } from "@/lib/localLedger/localLedger";
 import { showToast } from "@/lib/toast";
 import { useUser } from "@clerk/clerk-expo";
 import { useAction, useQuery } from "convex/react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-
 import { useAtom } from "jotai";
 import { CheckCircle, Send, Wallet } from "lucide-react-native";
 import React, { useState } from "react";
@@ -30,6 +233,7 @@ const COLORS = {
   pureWhite: "#FFFFFF",
   greenAccent: "#c0f667",
 };
+
 export default function SendPayment() {
   const { user } = useUser();
   const router = useRouter();
@@ -37,22 +241,14 @@ export default function SendPayment() {
   const { deviceId, deviceName, deviceAddress } = params;
   const [userWalletPublicKey] = useAtom(walletAtom);
   const [amount, setAmount] = useState<number>(0);
-  // const [balance] = useAtom(balanceAtom);//Sol
 
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Fetch balance from ledger
   const balance = useQuery(api.users.getBalance, {
     clerkId: user?.id!,
   });
 
-  // Helper: get last transaction hash for Merkle DAG polyfill
-  const lastTx = useQuery(api.ledger.getLastTransaction, {
-    publicKey: userWalletPublicKey as string,
-  });
-
-  // Action hook for creating ledger transaction
   const createLedgerTx = useAction(api.ledgerNodeAction.createLedgerTxAction);
 
   const listenForAck = (
@@ -74,13 +270,9 @@ export default function SendPayment() {
 
           if (msg.type !== "PAYMENT_ACK") return;
           if (!msg.accepted) return;
-          if (!msg.toPubkey) {
-            console.log("Client: No Receiver Wallet ACK Found");
-          }
 
           clearTimeout(timeout);
           sub.remove();
-
           resolve(msg);
         } catch (e) {
           console.log("CLIENT ACK PARSE ERROR", e);
@@ -96,18 +288,15 @@ export default function SendPayment() {
         title: "Invalid amount",
         message: "Invalid amount",
       });
-
-      setSuccess(false);
       return;
     }
+
     if (amount > balance?.balance!) {
       showToast({
         type: "error",
         title: "Insufficient amount",
         message: "Insufficient amount",
       });
-      setSuccess(false);
-
       return;
     }
 
@@ -117,57 +306,70 @@ export default function SendPayment() {
         title: "Connection Error",
         message: "Device not connected",
       });
-      setSuccess(false);
       return;
     }
+
     const payload = {
-      amount: amount,
+      amount,
       currency: "PKR",
       senderName: user?.primaryEmailAddress,
       senderClerkId: user?.id,
       time: Date.now(),
     };
+
     const ledgerPayload = {
       fromPubkey: userWalletPublicKey,
-      amount: amount,
+      amount,
       timestamp: Date.now(),
     };
 
     try {
       setSending(true);
 
-      console.log("Writing From Client");
       await RNBluetoothClassic.writeToDevice(
         deviceId as string,
         JSON.stringify(payload) + "\n"
       );
 
       const ack = await listenForAck(deviceId as string);
-      console.log("ACK received:", ack);
 
-      // Insert into ledger (offline-first)
-      const ledgerEntry = await createLedgerTx({
+      // ✅ FIX 1: async ledger creation
+      const ledger = await LocalLedger.create();
+      const tips = ledger.getTips();
+
+      const parentHashes =
+        tips.length >= 2
+          ? [tips[0].txHash, tips[1].txHash]
+          : tips.map((t) => t.txHash);
+
+      const txData = `${ledgerPayload.fromPubkey}:${ack.toPubkey}:${payload.amount}:${Date.now()}:${parentHashes.join(
+        ","
+      )}`;
+
+      const txHash = await generateTxHash(txData);
+
+      // ✅ FIX 2: await addTransaction
+      await ledger.addTransaction({
+        txHash,
         fromPubkey: ledgerPayload.fromPubkey as string,
         toPubkey: ack.toPubkey as string,
-        amount: payload.amount,
-        parentHashes: lastTx ? [lastTx.txHash] : [],
-        signature: "offline-simulated-signature",
+        amount,
+        parentHashes,
+        timestamp: Date.now(),
+        synced: false,
       });
 
-      console.log("Ledger entry created:", ledgerEntry);
+      // ✅ FIX 3: await sync
+      await ledger.sync(createLedgerTx);
 
       setSuccess(true);
 
-      // Auto-disconnect after 2 seconds and go back
       setTimeout(async () => {
         try {
           await RNBluetoothClassic.disconnectFromDevice(deviceId as string);
         } catch {}
-        if (router.canGoBack()) {
-          router.back();
-        } else {
-          router.replace("/(protected)");
-        }
+
+        router.canGoBack() ? router.back() : router.replace("/(protected)");
       }, 2000);
     } catch (err) {
       console.error("SEND ERROR", err);
@@ -176,7 +378,6 @@ export default function SendPayment() {
         title: "Payment Failed",
         message: "Could not send your payment",
       });
-      setSuccess(false);
     } finally {
       setSending(false);
     }
