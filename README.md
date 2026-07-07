@@ -1,6 +1,8 @@
-# OrbitPay — Mobile Wallet & Payment MVP ✅
-
 **OrbitPay** is a cross-platform prototype built with Expo + React Native that demonstrates peer-to-peer (Bluetooth) payments, Solana devnet wallet operations, and a credit-score prediction workflow. The app uses Clerk for authentication and Convex for server-side logic and persisted data.
+
+---
+
+![OrbitPay Poster](assets/poster/orbitpay.png)
 
 ---
 
